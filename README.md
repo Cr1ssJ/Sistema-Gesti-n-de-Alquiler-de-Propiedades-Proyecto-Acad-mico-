@@ -1,1 +1,0 @@
-# Sistema-Gesti-n-de-Alquiler-de-Propiedades-Proyecto-Acad-mico-
