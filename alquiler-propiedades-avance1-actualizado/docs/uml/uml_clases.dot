@@ -1,0 +1,34 @@
+
+digraph G {
+    graph [rankdir=LR];
+    node [shape=record, fontname="Helvetica"];
+
+    Direccion [label="{Direccion|+pais:String\l+provincia:String\l+ciudad:String\l+barrio:String\l+calle:String\l+numero:String\l+codigoPostal:String\l|+getFormatoCorto():String\l}"];
+    Propiedad [label="{Propiedad| -id:String\l -tipo:Tipo\l -areaM2:double\l -habitaciones:int\l -banos:int\l -amoblado:boolean\l -servicios:List<ServicioIncluido>\l -direccion:Direccion\l | +agregarServicio(s:ServicioIncluido):void\l +getServicios():List<ServicioIncluido>\l +getDireccion():Direccion\l +getId():String\l}"];
+    Inquilino [label="{Inquilino| -id:String\l -nombre:String\l -email:String\l -telefono:String\l | +getNombre():String\l}"];
+    Propietario [label="{Propietario| -id:String\l -nombre:String\l -email:String\l | }"];
+    Contrato [label="{ContratoAlquiler| -id:String\l -propiedad:Propiedad\l -inquilino:Inquilino\l -fechaInicio:LocalDate\l -fechaFin:LocalDate\l -montoMensual:double\l -estado:Estado\l -pagos:List<Pago>\l | +registrarPago(p:Pago):void\l +estaVigente(hoy:LocalDate):boolean\l}"];
+    Pago [label="{Pago| -id:String\l -contratoId:String\l -fechaPago:LocalDate\l -monto:double\l -metodo:String\l | }"];
+    PlanPago [label="{PlanPago| -contratoId:String\l -proximoVencimiento:LocalDate\l -diaCorte:int\l | }"];
+    SolMant [label="{SolicitudMantenimiento| -id:String\l -propiedad:Propiedad\l -solicitadoPor:Inquilino\l -descripcion:String\l -fechaSolicitud:LocalDate\l -estado:Estado\l -asignado:Tecnico\l | +asignarTecnico(t:Tecnico):void\l +marcarResuelta():void\l}"];
+    Tecnico [label="{Tecnico| -id:String\l -nombre:String\l -especialidad:String\l | }"];
+    ServicioIncluido [label="{ServicioIncluido| -tipo:Tipo\l -incluido:boolean\l | }"];
+    Usuario [label="{Usuario| #id:String\l #nombreUsuario:String\l #rol:String\l | +tieneRol(r:String):boolean\l}"];
+    Admin [label="{Administrador| (hereda Usuario)\l | }"];
+    Notif [label="{Notificacion| -id:String\l -usuarioId:String\l -mensaje:String\l -fecha:LocalDateTime\l -leida:boolean\l | +marcarLeida():void\l}"];
+    GestorReportes [label="{GestorReportes| | +generarReportePorUbicacion():void\l +generarReportePorTipoPropiedad():void\l}"];
+
+    Propiedad -> Direccion [arrowhead=none, label="1"];
+    Contrato -> Propiedad [arrowhead=none, label="1"];
+    Contrato -> Inquilino [arrowhead=none, label="1"];
+    Propiedad -> ServicioIncluido [arrowhead=vee, label="*"];
+    Contrato -> Pago [arrowhead=vee, label="*"];
+    PlanPago -> Contrato [style=dashed, label="para"];
+    SolMant -> Propiedad [arrowhead=none];
+    SolMant -> Inquilino [style=dashed, label="solicitadoPor"];
+    SolMant -> Tecnico [style=dashed, label="asignado"];
+    Admin -> Usuario [arrowhead=empty];
+    Notif -> Usuario [style=dashed, label="destinatario"];
+    GestorReportes -> Propiedad [style=dashed];
+    GestorReportes -> Direccion [style=dashed];
+}
