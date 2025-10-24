@@ -78,4 +78,4 @@ alquiler-propiedades/
 
 ---
 
-> Proyecto desarrollado para la asignatura **Programación**, Universidad Tecnológica de Panamá (UTP).
+> Proyecto desarrollado para la asignatura **Programación I**, Universidad Tecnológica de Panamá (UTP).
