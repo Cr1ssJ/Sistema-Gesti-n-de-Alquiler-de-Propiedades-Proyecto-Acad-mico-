@@ -56,7 +56,7 @@ alquiler-propiedades/
 | Archivo | Descripción |
 |----------|-------------|
 | `Avance1_Documentacion_Sistema_Alquiler.docx` | Contiene las tablas de escenarios, clases, atributos y métodos. |
-| `Avance #1 Proyecto Programacion.png` | Diagrama UML simplificado del sistema. |
+| `Avance #1 Proyecto Programacion.png` | Diagrama UML del sistema. |
 
 ---
 
