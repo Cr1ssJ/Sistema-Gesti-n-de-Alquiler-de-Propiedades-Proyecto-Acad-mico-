@@ -45,8 +45,8 @@ alquiler-propiedades/
 ├── docs/
 │   ├── Avance1_Documentacion_Sistema_Alquiler.docx
 │   ├── uml/
-│   │   ├── uml_clases_simplificado.png
-│   │   └── uml_clases_simplificado.dot
+│   │   ├── Avance #1 Proyecto Programacion.png
+│   │   
 └── README.md
 ```
 
@@ -56,8 +56,7 @@ alquiler-propiedades/
 | Archivo | Descripción |
 |----------|-------------|
 | `Avance1_Documentacion_Sistema_Alquiler.docx` | Contiene las tablas de escenarios, clases, atributos y métodos. |
-| `uml_clases_simplificado.png` | Diagrama UML simplificado del sistema. |
-| `uml_clases_simplificado.dot` | Versión editable del diagrama UML (Graphviz). |
+| `Avance #1 Proyecto Programacion.png` | Diagrama UML simplificado del sistema. |
 
 ---
 
