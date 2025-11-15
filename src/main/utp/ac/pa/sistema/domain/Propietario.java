@@ -1,0 +1,1 @@
+package utp.ac.pa.sistema.domain;public class Propietario extends Usuario {public String email;public Propietario(String id,String nombre,String email){super(id,nombre,"PROPIETARIO");this.email=email;}}

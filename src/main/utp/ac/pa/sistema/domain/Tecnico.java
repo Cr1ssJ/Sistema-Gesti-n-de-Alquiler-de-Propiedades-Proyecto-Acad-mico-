@@ -1,0 +1,1 @@
+package utp.ac.pa.sistema.domain;public class Tecnico extends Usuario {public String especialidad;public Tecnico(String id,String nombre,String especialidad){super(id,nombre,"TECNICO");this.especialidad=especialidad;}}

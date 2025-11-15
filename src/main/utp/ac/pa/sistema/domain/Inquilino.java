@@ -1,0 +1,1 @@
+package utp.ac.pa.sistema.domain;public class Inquilino extends Usuario {public String email,telefono;public Inquilino(String id,String nombre,String email,String telefono){super(id,nombre,"INQUILINO");this.email=email;this.telefono=telefono;}}
