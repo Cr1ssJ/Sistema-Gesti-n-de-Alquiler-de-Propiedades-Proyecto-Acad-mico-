@@ -1,0 +1,1 @@
+package utp.ac.pa.sistema.domain;public class ServicioIncluido {public enum Tipo{AGUA,LUZ,GAS,INTERNET,ASEO}public Tipo tipo;public boolean incluido;public ServicioIncluido(Tipo tipo,boolean incluido){this.tipo=tipo;this.incluido=incluido;}public String toString(){return tipo+(incluido?" (incluido)":" (no)");}}

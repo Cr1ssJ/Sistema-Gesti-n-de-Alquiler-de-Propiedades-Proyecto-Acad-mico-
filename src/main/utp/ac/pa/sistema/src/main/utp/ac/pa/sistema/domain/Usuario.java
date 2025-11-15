@@ -1,0 +1,1 @@
+package utp.ac.pa.sistema.domain;public class Usuario {public String id,nombreUsuario,rol;public Usuario(String id,String nombreUsuario,String rol){this.id=id;this.nombreUsuario=nombreUsuario;this.rol=rol;}public boolean tieneRol(String r){return rol!=null&&rol.equalsIgnoreCase(r);}public String toString(){return nombreUsuario+" ("+rol+")";}}
