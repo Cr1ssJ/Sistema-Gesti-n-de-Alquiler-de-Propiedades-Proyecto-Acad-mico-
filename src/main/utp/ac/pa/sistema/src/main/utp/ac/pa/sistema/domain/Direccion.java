@@ -1,2 +1,0 @@
-package utp.ac.pa.sistema.domain;
-public class Direccion {public String pais, provincia, ciudad, barrio, calle, numero, codigoPostal;public Direccion(String pais,String provincia,String ciudad,String barrio,String calle,String numero,String codigoPostal){this.pais=pais;this.provincia=provincia;this.ciudad=ciudad;this.barrio=barrio;this.calle=calle;this.numero=numero;this.codigoPostal=codigoPostal;}public String getFormatoCorto(){return ciudad+", "+barrio+" - "+calle+" "+numero;}public String toString(){return getFormatoCorto();}}

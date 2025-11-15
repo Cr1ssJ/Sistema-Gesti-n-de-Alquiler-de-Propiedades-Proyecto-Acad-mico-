@@ -1,1 +1,0 @@
-package utp.ac.pa.sistema.domain;public class GestorReportes {public void generarReportePorUbicacion(java.util.List<?> props){System.out.println("[Reporte] Propiedades por ubicación: "+props.size());}public void generarReportePorTipoPropiedad(java.util.List<?> props){System.out.println("[Reporte] Propiedades por tipo: "+props.size());}}
