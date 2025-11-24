@@ -57,6 +57,8 @@ alquiler-propiedades/
 |----------|-------------|
 | `Avance1_Documentacion_Sistema_Alquiler.docx` | Contiene las tablas de escenarios, clases, atributos y métodos. |
 | `Avance #1 Proyecto Programacion.png` | Diagrama UML del sistema. |
+| `Tablas Avance #2.docx` | Contiene las tablas de clases y escenarios actualizados en base al nuevo diagrama UML. |
+| `Diagrama UML Actualizado.png` | Diagrama UML del sistema. |
 
 ---
 
@@ -77,4 +79,8 @@ alquiler-propiedades/
 
 ---
 
+##  Avance #2 — Entregables
+-  Documento de Word Actualizado con tablas de escenarios y clases.  
+-  Diagrama UML Actualizado aplicando feedback brindado por el profesor.  
+   
 > Proyecto desarrollado para la asignatura **Programación I**, Universidad Tecnológica de Panamá (UTP).
