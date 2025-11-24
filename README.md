@@ -24,7 +24,7 @@ alquiler-propiedades/
 │   │       ├── ac/
 │   │       │   └── pa/
 │   │       │       └── sistema/
-│   │       │           ├── App.java               ← Clase principal
+│   │       │           ├── Main.java               ← Clase principal
 │   │       │           ├── utils/
 │   │       │           │   └── IOUtils.java
 │   │       │           └── domain/
