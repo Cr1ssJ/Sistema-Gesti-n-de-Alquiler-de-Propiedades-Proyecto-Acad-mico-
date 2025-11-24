@@ -10,7 +10,7 @@
 
 ##  Descripción del proyecto
 El **Sistema de Gestión de Alquiler de Propiedades** permite administrar propiedades, contratos de alquiler, inquilinos, pagos, mantenimiento y reportes.  
-Este avance corresponde al **Avance #1**, que incluye la definición de clases, escenarios clave, y la estructura del repositorio en GitHub.
+Este avance corresponde al **Avance #1 y Avance #2**, que incluye la definición de clases, escenarios clave, y la estructura del repositorio en GitHub.
 
 ---
 
