@@ -20,27 +20,45 @@ public class Main {
         boolean run = true;
 
         while (run) {
-            String op = IOUtils.ask("Menú principal",
-                    """
-                    1) Registrar Propiedad
-                    2) Registrar Inquilino
-                    3) Crear Contrato de Alquiler
-                    4) Registrar Pago
-                    5) Registrar Solicitud de Mantenimiento
-                    6) Ver Resumen (GestorReportes)
-                    0) Salir
-                    """);
 
-            if (op == null) break;
+            String menu = """
+                    === SISTEMA DE GESTIÓN DE ALQUILERES ===
+                    
+                    1. Registrar propiedad
+                    2. Registrar inquilino
+                    3. Crear contrato de alquiler
+                    4. Registrar pago
+                    5. Registrar solicitud de mantenimiento           
+                    6. Ver resumen del sistema               
+                    7. Cambiar estado de contrato
+                    8. Cambiar estado de ticket de mantenimiento      
+                    9. Listar propiedades disponibles
+                    10. Listar inquilinos      
+                    0. Salir
+                    
+                    Seleccione una opción:
+                    """;
 
-            switch (op.trim()) {
+            String opcion = IOUtils.ask("Menú principal", menu);
+
+            switch (opcion) {
                 case "1" -> Propiedad.registrarPropiedad(propiedades);
                 case "2" -> Inquilino.registrarInquilino(inquilinos);
                 case "3" -> ContratoAlquiler.crearContrato(propiedades, inquilinos, contratos);
                 case "4" -> Pago.registrarPago(contratos, pagos);
                 case "5" -> SolicitudMantenimiento.registrarSolicitud(propiedades, inquilinos, tickets);
-                case "6" -> GestorReportes.mostrarResumen(propiedades, inquilinos, contratos, pagos, tickets);
+
+                case "6" -> GestorReportes.mostrarResumen(
+                        propiedades, inquilinos, contratos, pagos, tickets);
+
+                case "7" -> ContratoAlquiler.cambiarEstadoManual(contratos);
+                case "8" -> SolicitudMantenimiento.cambiarEstadoInteractivo(tickets);
+
+                case "9" -> Propiedad.listarDisponibles(propiedades);
+                case "10" -> Inquilino.listarInquilinos(inquilinos);
+
                 case "0" -> run = false;
+
                 default -> IOUtils.warn("Opción inválida", "Por favor elija una opción válida.");
             }
         }
