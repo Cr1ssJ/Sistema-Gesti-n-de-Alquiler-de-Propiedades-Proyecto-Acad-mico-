@@ -24,33 +24,83 @@ public class Pago {
         this.metodo = metodo;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getContratoId() {
+        return contratoId;
+    }
+
+    public LocalDate getFechaPago() {
+        return fechaPago;
+    }
+
+    public double getMonto() {
+        return monto;
+    }
+
+    public String getMetodo() {
+        return metodo;
+    }
+
     /**
-     * Caso de uso: registrar un pago para un contrato.
+     * Registra un pago validando:
+     * - Que exista el contrato
+     * - Que el ID de pago no se repita
+     * - Que el monto sea numérico y > 0
+     * - Que la fecha sea válida
      */
-    public static void registrarPago(List<ContratoAlquiler> contratos,
-                                     List<Pago> pagos) {
+    public static void registrarPago(List<ContratoAlquiler> contratos, List<Pago> pagos) {
+
         if (contratos.isEmpty()) {
-            IOUtils.warn("Faltan datos", "Debe existir al menos un contrato.");
+            IOUtils.warn("Sin contratos",
+                    "Debe existir al menos un contrato para registrar pagos.");
             return;
         }
 
-        String contratoId = IOUtils.ask("Pago", "ID del contrato:");
-        ContratoAlquiler c = contratos.stream()
-                .filter(k -> k.getId().equals(contratoId))
-                .findFirst()
-                .orElse(null);
-
+        // Verificar que el contrato exista
+        String contratoId = IOUtils.askNonEmpty("Pago", "ID del contrato:");
+        ContratoAlquiler c = ContratoAlquiler.buscarPorId(contratos, contratoId);
         if (c == null) {
-            IOUtils.warn("Error", "Contrato no encontrado.");
+            IOUtils.warn("Contrato no encontrado",
+                    "No existe un contrato con ese ID.");
             return;
         }
 
-        String id = IOUtils.ask("Pago", "ID del pago:");
-        String fecha = IOUtils.ask("Pago", "Fecha (YYYY-MM-DD):");
-        double monto = IOUtils.toDouble(IOUtils.ask("Pago", "Monto:"), 0);
-        String metodo = IOUtils.ask("Pago", "Método:");
+        // ID de pago único
+        String id;
+        while (true) {
+            id = IOUtils.askNonEmpty("Pago", "ID del pago:");
+            boolean existe = false;
+            for (Pago p : pagos) {
+                if (p.id.equals(id)) {
+                    existe = true;
+                    break;
+                }
+            }
+            if (existe) {
+                IOUtils.warn("ID duplicado",
+                        "Ya existe un pago con ese ID. Ingrese otro.");
+            } else {
+                break;
+            }
+        }
 
-        Pago p = new Pago(id, contratoId, LocalDate.parse(fecha), monto, metodo);
+        // Fecha de pago
+        LocalDate fecha = IOUtils.askFecha("Pago", "Fecha de pago");
+
+        // Monto (solo números, mayor que 0)
+        double monto = IOUtils.askDouble("Pago", "Monto del pago:");
+        if (monto <= 0) {
+            IOUtils.warn("Monto inválido", "El monto debe ser mayor que 0.");
+            return;
+        }
+
+        String metodo = IOUtils.askNonEmpty("Pago",
+                "Método de pago (efectivo, transferencia, etc.):");
+
+        Pago p = new Pago(id, contratoId, fecha, monto, metodo);
         c.registrarPago(p);
         pagos.add(p);
 

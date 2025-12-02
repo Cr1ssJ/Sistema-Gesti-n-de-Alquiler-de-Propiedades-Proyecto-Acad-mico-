@@ -5,7 +5,6 @@ import java.util.List;
 
 /**
  * Representa a un inquilino del sistema.
- * Extiende Usuario y además incluye email y teléfono.
  */
 public class Inquilino extends Usuario {
 
@@ -18,25 +17,64 @@ public class Inquilino extends Usuario {
         this.telefono = telefono;
     }
 
-    public String getNombre() {
-        return nombreUsuario;
+    public String getEmail() {
+        return email;
     }
 
-    /**
-     * Método estático de "caso de uso".
-     * Pide los datos con JOptionPane,
-     * crear el Inquilino y agregarlo a la lista recibida.
-     */
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public static Inquilino buscarPorId(List<Inquilino> lista, String id) {
+        for (Inquilino i : lista) {
+            if (i.id.equals(id)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
     public static void registrarInquilino(List<Inquilino> lista) {
-        String id = IOUtils.ask("Inquilino", "ID:");
-        String nombre = IOUtils.ask("Inquilino", "Nombre:");
-        String email = IOUtils.ask("Inquilino", "Email:");
-        String tel = IOUtils.ask("Inquilino", "Teléfono:");
+        // ID
+        String id;
+        while (true) {
+            id = IOUtils.askNonEmpty("Inquilino", "ID:");
+            if (buscarPorId(lista, id) != null) {
+                IOUtils.warn("ID duplicado",
+                        "Ya existe un inquilino con ese ID. Ingrese uno diferente.");
+            } else {
+                break;
+            }
+        }
+
+        String nombre = IOUtils.askSoloLetras("Inquilino", "Nombre (solo letras):");
+        String email = IOUtils.askEmail("Inquilino", "Email:");
+        String tel = IOUtils.askSoloDigitos("Inquilino", "Teléfono (solo números):");
 
         Inquilino i = new Inquilino(id, nombre, email, tel);
         lista.add(i);
 
         IOUtils.info("OK", "Inquilino registrado:\n" + i);
+    }
+
+    /**
+     * Lista todos los inquilinos registrados.
+     */
+    public static void listarInquilinos(List<Inquilino> lista) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== INQUILINOS REGISTRADOS ===\n");
+        if (lista.isEmpty()) {
+            sb.append("No hay inquilinos registrados.\n");
+        } else {
+            for (Inquilino i : lista) {
+                sb.append("- ID: ").append(i.id)
+                  .append(" | Nombre: ").append(i.nombreUsuario)
+                  .append(" | Email: ").append(i.email)
+                  .append(" | Tel: ").append(i.telefono)
+                  .append("\n");
+            }
+        }
+        IOUtils.info("Inquilinos", sb.toString());
     }
 
     @Override
