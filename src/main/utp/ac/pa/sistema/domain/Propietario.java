@@ -1,23 +1,13 @@
 package utp.ac.pa.sistema.domain;
 
 /**
- * Representa al dueño de una o varias propiedades.
+ * Usuario de tipo Propietario (dueño de propiedades).
  */
 public class Propietario extends Usuario {
 
-    private String email;
-
-    public Propietario(String id, String nombreUsuario, String email) {
-        super(id, nombreUsuario, "PROPIETARIO");
-        this.email = email;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public String toString() {
-        return nombreUsuario + " (" + email + ")";
+    public Propietario(String id, String nombreCompleto, String email, String telefono,
+                       String nombreUsuario, String contrasena)
+            throws ValidacionException {
+        super(id, nombreCompleto, email, telefono, nombreUsuario, contrasena, "PROPIETARIO");
     }
 }

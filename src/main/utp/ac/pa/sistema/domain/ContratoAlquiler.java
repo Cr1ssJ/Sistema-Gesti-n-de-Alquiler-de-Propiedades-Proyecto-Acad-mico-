@@ -1,225 +1,275 @@
 package utp.ac.pa.sistema.domain;
 
-import utp.ac.pa.sistema.utils.IOUtils;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import utp.ac.pa.sistema.utils.IOUtils;
+
 /**
- * Representa un contrato de alquiler entre una propiedad y un inquilino.
+ * Representa un contrato de alquiler entre un inquilino y una propiedad.
+ * Aquí vive la lógica de pagos, vencimientos y estado del contrato.
  */
 public class ContratoAlquiler {
 
-    public enum Estado { ACTIVO, FINALIZADO, CANCELADO }
-
-    private String id;
+    private String idContrato;
     private Propiedad propiedad;
     private Inquilino inquilino;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private double montoMensual;
-    private Estado estado;
-    private List<Pago> pagos = new ArrayList<>();
+    private int diaCorte;
+    private LocalDate proximoVencimiento;
+    private EstadoContrato estado;
+    private List<Pago> pagos;
 
-    public ContratoAlquiler(String id,
-                            Propiedad propiedad,
-                            Inquilino inquilino,
-                            LocalDate fechaInicio,
-                            LocalDate fechaFin,
-                            double montoMensual) {
-        this.id = id;
-        this.propiedad = propiedad;
-        this.inquilino = inquilino;
-        this.fechaInicio = fechaInicio;
-        this.fechaFin = fechaFin;
-        this.montoMensual = montoMensual;
-        setEstadoInterno(Estado.ACTIVO);
+    public ContratoAlquiler(String idContrato, Propiedad propiedad, Inquilino inquilino,
+                            LocalDate fechaInicio, LocalDate fechaFin, double montoMensual,
+                            int diaCorte) throws ValidacionException {
+        setIdContrato(idContrato);
+        setPropiedad(propiedad);
+        setInquilino(inquilino);
+        setFechaInicio(fechaInicio);
+        setFechaFin(fechaFin);
+        setMontoMensual(montoMensual);
+        setDiaCorte(diaCorte);
+        this.estado = EstadoContrato.VIGENTE;
+        this.pagos = new ArrayList<>();
+        this.proximoVencimiento = calcularProximoVencimientoInicial();
     }
 
-    private void setEstadoInterno(Estado nuevoEstado) {
-        this.estado = nuevoEstado;
-        if (propiedad != null) {
-            if (nuevoEstado == Estado.ACTIVO) {
-                propiedad.setEstado(Propiedad.Estado.ALQUILADA);
-            } else {
-                propiedad.setEstado(Propiedad.Estado.DISPONIBLE);
-            }
+    private void validarTextoObligatorio(String valor, String campo) throws ValidacionException {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new ValidacionException("El campo " + campo + " es obligatorio.");
         }
     }
 
-    public String getId() {
-        return id;
+    public String getIdContrato() {
+        return idContrato;
+    }
+
+    public void setIdContrato(String idContrato) throws ValidacionException {
+        validarTextoObligatorio(idContrato, "id de contrato");
+        this.idContrato = idContrato.trim();
     }
 
     public Propiedad getPropiedad() {
         return propiedad;
     }
 
+    public void setPropiedad(Propiedad propiedad) throws ValidacionException {
+        if (propiedad == null) {
+            throw new ValidacionException("La propiedad del contrato es obligatoria.");
+        }
+        this.propiedad = propiedad;
+    }
+
     public Inquilino getInquilino() {
         return inquilino;
+    }
+
+    public void setInquilino(Inquilino inquilino) throws ValidacionException {
+        if (inquilino == null) {
+            throw new ValidacionException("El inquilino del contrato es obligatorio.");
+        }
+        this.inquilino = inquilino;
     }
 
     public LocalDate getFechaInicio() {
         return fechaInicio;
     }
 
+    public void setFechaInicio(LocalDate fechaInicio) throws ValidacionException {
+        if (fechaInicio == null) {
+            throw new ValidacionException("La fecha de inicio es obligatoria.");
+        }
+        this.fechaInicio = fechaInicio;
+    }
+
     public LocalDate getFechaFin() {
         return fechaFin;
+    }
+
+    public void setFechaFin(LocalDate fechaFin) throws ValidacionException {
+        if (fechaFin == null || (fechaInicio != null && fechaFin.isBefore(fechaInicio))) {
+            throw new ValidacionException("La fecha de fin es obligatoria y debe ser posterior a la fecha de inicio.");
+        }
+        this.fechaFin = fechaFin;
     }
 
     public double getMontoMensual() {
         return montoMensual;
     }
 
-    public Estado getEstado() {
+    public void setMontoMensual(double montoMensual) throws ValidacionException {
+        if (montoMensual <= 0) {
+            throw new ValidacionException("El monto mensual debe ser mayor a cero.");
+        }
+        this.montoMensual = montoMensual;
+    }
+
+    public int getDiaCorte() {
+        return diaCorte;
+    }
+
+    public void setDiaCorte(int diaCorte) throws ValidacionException {
+        if (diaCorte < 1 || diaCorte > 28) {
+            throw new ValidacionException("El día de corte debe estar entre 1 y 28.");
+        }
+        this.diaCorte = diaCorte;
+    }
+
+    public LocalDate getProximoVencimiento() {
+        return proximoVencimiento;
+    }
+
+    public EstadoContrato getEstado() {
         return estado;
     }
 
+    public void setEstado(EstadoContrato estado) {
+        this.estado = estado;
+    }
+
     public List<Pago> getPagos() {
-        return pagos;
-    }
-
-    public void registrarPago(Pago pago) {
-        if (pago != null) {
-            pagos.add(pago);
-        }
-    }
-
-    public void finalizar() {
-        setEstadoInterno(Estado.FINALIZADO);
-    }
-
-    public void cancelar() {
-        setEstadoInterno(Estado.CANCELADO);
-    }
-
-    public static ContratoAlquiler buscarPorId(List<ContratoAlquiler> contratos, String id) {
-        for (ContratoAlquiler c : contratos) {
-            if (c.id.equals(id)) {
-                return c;
-            }
-        }
-        return null;
+        return new ArrayList<>(pagos);
     }
 
     /**
-     * Crea un contrato con validaciones (incluye fechas).
+     * Calcula el primer vencimiento del contrato usando fechaInicio y diaCorte.
+     */
+    private LocalDate calcularProximoVencimientoInicial() {
+        LocalDate base = fechaInicio.withDayOfMonth(Math.min(diaCorte, fechaInicio.lengthOfMonth()));
+        if (base.isBefore(fechaInicio)) {
+            return base.plusMonths(1);
+        }
+        return base;
+    }
+
+    /**
+     * Avanza el próximo vencimiento un mes.
+     * Se llama normalmente cuando se registra un pago correcto.
+     */
+    public void actualizarProximoVencimiento() {
+        this.proximoVencimiento = this.proximoVencimiento.plusMonths(1);
+    }
+
+    /**
+     * Indica si el contrato está vencido respecto al próximo vencimiento.
+     */
+    public boolean estaVencido() {
+        return LocalDate.now().isAfter(proximoVencimiento) && estado == EstadoContrato.VIGENTE;
+    }
+
+    /**
+     * Registra un pago dentro del contrato y actualiza el vencimiento.
+     */
+    public void registrarPago(Pago pago) throws ValidacionException {
+        if (pago == null) {
+            throw new ValidacionException("El pago no puede ser nulo.");
+        }
+        this.pagos.add(pago);
+        actualizarProximoVencimiento();
+    }
+
+    /**
+     * Flujo interactivo para crear un contrato.
      */
     public static void crearContrato(List<Propiedad> propiedades,
                                      List<Inquilino> inquilinos,
                                      List<ContratoAlquiler> contratos) {
-
-        if (propiedades.isEmpty() || inquilinos.isEmpty()) {
-            IOUtils.warn("Datos insuficientes",
-                    "Debe existir al menos una propiedad y un inquilino antes de crear un contrato.");
+        if (propiedades.isEmpty()) {
+            IOUtils.warn("Sin propiedades", "Debe registrar una propiedad primero.");
             return;
         }
-
-        // ID único
-        String id;
-        while (true) {
-            id = IOUtils.askNonEmpty("Contrato", "ID del contrato:");
-            if (buscarPorId(contratos, id) != null) {
-                IOUtils.warn("ID duplicado",
-                        "Ya existe un contrato con ese ID. Ingrese uno diferente.");
-            } else {
-                break;
+        if (inquilinos.isEmpty()) {
+            IOUtils.warn("Sin inquilinos", "Debe registrar un inquilino primero.");
+            return;
+        }
+        try {
+            String id = IOUtils.askNonEmpty("Crear contrato", "ID del contrato");
+            if (contratos.stream().anyMatch(c -> c.getIdContrato().equalsIgnoreCase(id))) {
+                IOUtils.warn("Duplicado", "Ya existe un contrato con ese ID.");
+                return;
             }
-        }
 
-        // Propiedad
-        String idProp = IOUtils.askNonEmpty("Contrato", "ID de la propiedad asociada:");
-        Propiedad prop = Propiedad.buscarPorId(propiedades, idProp);
-        if (prop == null) {
-            IOUtils.warn("Propiedad no encontrada", "No existe una propiedad con ese ID.");
-            return;
-        }
-        if (prop.getEstado() == Propiedad.Estado.ALQUILADA) {
-            IOUtils.warn("Propiedad ocupada",
-                    "La propiedad ya está alquilada. No se puede crear un nuevo contrato activo.");
-            return;
-        }
-
-        // Inquilino
-        String idInq = IOUtils.askNonEmpty("Contrato", "ID del inquilino:");
-        Inquilino inq = Inquilino.buscarPorId(inquilinos, idInq);
-        if (inq == null) {
-            IOUtils.warn("Inquilino no encontrado", "No existe un inquilino con ese ID.");
-            return;
-        }
-
-        // Fechas
-        LocalDate inicio = IOUtils.askFecha("Contrato", "Fecha de inicio");
-        LocalDate fin;
-        while (true) {
-            fin = IOUtils.askFecha("Contrato", "Fecha de fin");
-            if (fin.isBefore(inicio)) {
-                IOUtils.warn("Rango de fechas inválido",
-                        "La fecha de fin no puede ser anterior a la fecha de inicio.");
-            } else {
-                break;
+            String idProp = IOUtils.askNonEmpty("Crear contrato", "ID de la propiedad");
+            Propiedad prop = propiedades.stream()
+                    .filter(p -> p.getIdPropiedad().equalsIgnoreCase(idProp))
+                    .findFirst()
+                    .orElse(null);
+            if (prop == null) {
+                IOUtils.warn("No encontrada", "Propiedad no encontrada.");
+                return;
             }
+            if (!prop.isDisponible()) {
+                IOUtils.warn("No disponible", "La propiedad ya esta alquilada.");
+                return;
+            }
+
+            String idInq = IOUtils.askNonEmpty("Crear contrato", "ID del inquilino");
+            Inquilino inq = inquilinos.stream()
+                    .filter(i -> i.getId().equalsIgnoreCase(idInq))
+                    .findFirst()
+                    .orElse(null);
+            if (inq == null) {
+                IOUtils.warn("No encontrado", "Inquilino no encontrado.");
+                return;
+            }
+
+            LocalDate inicio = IOUtils.askFecha("Crear contrato", "Fecha de inicio");
+            LocalDate fin = IOUtils.askFecha("Crear contrato", "Fecha de fin");
+            double monto = IOUtils.askDouble("Crear contrato",
+                    "Monto mensual (sugerido: " + prop.calcularPrecioTotalMensual() + ")");
+
+            int diaCorte;
+            while (true) {
+                diaCorte = IOUtils.askInt("Crear contrato", "Dia de corte (1-28)");
+                if (diaCorte >= 1 && diaCorte <= 28) break;
+                IOUtils.warn("Dato invalido", "El dia de corte debe estar entre 1 y 28.");
+            }
+
+            ContratoAlquiler contrato = new ContratoAlquiler(
+                    id, prop, inq, inicio, fin, monto, diaCorte);
+            contratos.add(contrato);
+            prop.setDisponible(false);
+            IOUtils.info("OK", "Contrato creado y propiedad marcada como no disponible.");
+        } catch (ValidacionException e) {
+            IOUtils.warn("Error", e.getMessage());
         }
-
-        // Monto
-        double monto = IOUtils.askDouble("Contrato", "Monto mensual del alquiler:");
-        if (monto <= 0) {
-            IOUtils.warn("Monto inválido", "El monto debe ser mayor que 0.");
-            return;
-        }
-
-        ContratoAlquiler c = new ContratoAlquiler(id, prop, inq, inicio, fin, monto);
-        contratos.add(c);
-
-        IOUtils.info("OK", "Contrato creado:\n" + c);
     }
 
     /**
-     * Permite cambiar manualmente el estado de un contrato.
+     * Permite cambiar el estado de un contrato manualmente.
      */
     public static void cambiarEstadoManual(List<ContratoAlquiler> contratos) {
         if (contratos.isEmpty()) {
-            IOUtils.warn("Sin contratos", "No hay contratos registrados.");
+            IOUtils.info("Contratos", "No hay contratos registrados.");
             return;
         }
-
-        String id = IOUtils.askNonEmpty("Contrato", "ID del contrato a actualizar:");
-        ContratoAlquiler c = buscarPorId(contratos, id);
-        if (c == null) {
-            IOUtils.warn("No encontrado", "No existe contrato con ese ID.");
+        String id = IOUtils.askNonEmpty("Cambiar estado", "ID de contrato");
+        ContratoAlquiler contrato = contratos.stream()
+                .filter(c -> c.getIdContrato().equalsIgnoreCase(id))
+                .findFirst()
+                .orElse(null);
+        if (contrato == null) {
+            IOUtils.warn("No encontrado", "Contrato no encontrado.");
             return;
         }
-
-        String msg = "Contrato: " + c.id +
-                "\nPropiedad: " + c.propiedad.getId() +
-                "\nInquilino: " + c.inquilino.getNombreUsuario() +
-                "\nEstado actual: " + c.estado +
-                "\n\nSeleccione nuevo estado:\n" +
-                "1. ACTIVO\n" +
-                "2. FINALIZADO\n" +
-                "3. CANCELADO";
-
-        int opcion = IOUtils.askInt("Cambio de estado", msg);
+        String opcion = IOUtils.askNonEmpty("Nuevo estado",
+                "Seleccione estado (1=VIGENTE, 2=VENCIDO, 3=CANCELADO)");
         switch (opcion) {
-            case 1 -> c.setEstadoInterno(Estado.ACTIVO);
-            case 2 -> c.finalizar();
-            case 3 -> c.cancelar();
+            case "1" -> contrato.setEstado(EstadoContrato.VIGENTE);
+            case "2" -> contrato.setEstado(EstadoContrato.VENCIDO);
+            case "3" -> {
+                contrato.setEstado(EstadoContrato.CANCELADO);
+                contrato.getPropiedad().setDisponible(true);
+            }
             default -> {
-                IOUtils.warn("Opción inválida", "No se realizó ningún cambio.");
+                IOUtils.warn("Opcion invalida", "No se realizo ningun cambio.");
                 return;
             }
         }
-
-        IOUtils.info("Estado actualizado",
-                "Nuevo estado del contrato " + c.id + ": " + c.estado +
-                        "\nEstado de la propiedad " + c.propiedad.getId() +
-                        ": " + c.propiedad.getEstado());
-    }
-
-    @Override
-    public String toString() {
-        return "Contrato{" + id + ", prop=" + propiedad.getId() +
-                ", inq=" + inquilino.getNombreUsuario() +
-                ", estado=" + estado + "}";
+        IOUtils.info("OK", "Estado actualizado a " + contrato.getEstado());
     }
 }

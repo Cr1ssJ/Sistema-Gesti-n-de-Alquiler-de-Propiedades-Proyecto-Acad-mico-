@@ -1,20 +1,13 @@
 package utp.ac.pa.sistema.domain;
 
 /**
- * Representa a un Administrador del sistema.
- * Extiende la clase base Usuario.
+ * Usuario de tipo Administrador del sistema.
  */
 public class Administrador extends Usuario {
 
-    /**
-     * Constructor de la clase Administrador.
-     *
-     * @param id             Identificador único del administrador
-     * @param nombreUsuario  Nombre del administrador
-     */
-    public Administrador(String id, String nombreUsuario) {
-        super(id, nombreUsuario, "ADMIN");
+    public Administrador(String id, String nombreCompleto, String email, String telefono,
+                         String nombreUsuario, String contrasena)
+            throws ValidacionException {
+        super(id, nombreCompleto, email, telefono, nombreUsuario, contrasena, "ADMINISTRADOR");
     }
-
-    
 }

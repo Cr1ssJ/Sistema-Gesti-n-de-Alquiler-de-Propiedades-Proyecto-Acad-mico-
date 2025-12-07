@@ -1,84 +1,59 @@
 package utp.ac.pa.sistema.domain;
 
-import utp.ac.pa.sistema.utils.IOUtils;
 import java.util.List;
 
+import utp.ac.pa.sistema.utils.IOUtils;
+
 /**
- * Representa a un inquilino del sistema.
+ * Usuario de tipo Inquilino (persona que alquila una propiedad).
  */
 public class Inquilino extends Usuario {
 
-    private String email;
-    private String telefono;
-
-    public Inquilino(String id, String nombre, String email, String telefono) {
-        super(id, nombre, "INQUILINO");
-        this.email = email;
-        this.telefono = telefono;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public static Inquilino buscarPorId(List<Inquilino> lista, String id) {
-        for (Inquilino i : lista) {
-            if (i.id.equals(id)) {
-                return i;
-            }
-        }
-        return null;
-    }
-
-    public static void registrarInquilino(List<Inquilino> lista) {
-        // ID
-        String id;
-        while (true) {
-            id = IOUtils.askNonEmpty("Inquilino", "ID:");
-            if (buscarPorId(lista, id) != null) {
-                IOUtils.warn("ID duplicado",
-                        "Ya existe un inquilino con ese ID. Ingrese uno diferente.");
-            } else {
-                break;
-            }
-        }
-
-        String nombre = IOUtils.askSoloLetras("Inquilino", "Nombre (solo letras):");
-        String email = IOUtils.askEmail("Inquilino", "Email:");
-        String tel = IOUtils.askSoloDigitos("Inquilino", "Teléfono (solo números):");
-
-        Inquilino i = new Inquilino(id, nombre, email, tel);
-        lista.add(i);
-
-        IOUtils.info("OK", "Inquilino registrado:\n" + i);
+    public Inquilino(String id, String nombreCompleto, String email, String telefono,
+                     String nombreUsuario, String contrasena)
+            throws ValidacionException {
+        super(id, nombreCompleto, email, telefono, nombreUsuario, contrasena, "INQUILINO");
     }
 
     /**
-     * Lista todos los inquilinos registrados.
+     * Flujo interactivo para registrar un inquilino.
      */
-    public static void listarInquilinos(List<Inquilino> lista) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("=== INQUILINOS REGISTRADOS ===\n");
-        if (lista.isEmpty()) {
-            sb.append("No hay inquilinos registrados.\n");
-        } else {
-            for (Inquilino i : lista) {
-                sb.append("- Cédula(ID): ").append(i.id)
-                  .append(" | Nombre: ").append(i.nombreUsuario)
-                  .append(" | Email: ").append(i.email)
-                  .append(" | Tel: ").append(i.telefono)
-                  .append("\n");
+    public static void registrarInquilino(List<Inquilino> inquilinos) {
+        try {
+            String id = IOUtils.askNonEmpty("Registrar inquilino", "ID del inquilino");
+            if (inquilinos.stream().anyMatch(i -> i.getId().equalsIgnoreCase(id))) {
+                IOUtils.warn("Duplicado", "Ya existe un inquilino con ese ID.");
+                return;
             }
+            String nombre = IOUtils.askSoloLetras("Registrar inquilino", "Nombre completo");
+            String email = IOUtils.askEmail("Registrar inquilino", "Email");
+            String telefono = IOUtils.askSoloDigitos("Registrar inquilino", "Telefono");
+            String usuario = IOUtils.askNonEmpty("Registrar inquilino", "Nombre de usuario");
+            String pass = IOUtils.askNonEmpty("Registrar inquilino", "Contrasena (min 6 chars)");
+
+            Inquilino nuevo = new Inquilino(id, nombre, email, telefono, usuario, pass);
+            inquilinos.add(nuevo);
+            IOUtils.info("OK", "Inquilino registrado con exito.");
+        } catch (ValidacionException e) {
+            IOUtils.warn("Error", e.getMessage());
         }
-        IOUtils.info("Inquilinos", sb.toString());
     }
 
-    @Override
-    public String toString() {
-        return nombreUsuario + " (" + email + ", " + telefono + ")";
+    /**
+     * Lista los inquilinos registrados.
+     */
+    public static void listarInquilinos(List<Inquilino> inquilinos) {
+        if (inquilinos == null || inquilinos.isEmpty()) {
+            IOUtils.info("Inquilinos", "No hay inquilinos registrados.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Inquilino i : inquilinos) {
+            sb.append("ID: ").append(i.getId())
+              .append(" | Nombre: ").append(i.getNombreCompleto())
+              .append(" | Email: ").append(i.getEmail())
+              .append("\n");
+        }
+        IOUtils.info("Listado de inquilinos", sb.toString());
     }
 }

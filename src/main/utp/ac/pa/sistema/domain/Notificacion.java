@@ -3,52 +3,73 @@ package utp.ac.pa.sistema.domain;
 import java.time.LocalDateTime;
 
 /**
- * Representa una notificación enviada a un usuario
- * (por ejemplo, aviso de pago o de ticket de mantenimiento).
+ * Representa una notificación enviada a un usuario del sistema.
+ * Ejemplo: recordatorio de pago, aviso de mantenimiento, etc.
  */
 public class Notificacion {
 
-    private String id;
-    private String usuarioId;   // id del Usuario destino
+    private String idNotificacion;
+    private Usuario usuarioDestino;
     private String mensaje;
-    private LocalDateTime fecha;
+    private LocalDateTime fechaEnvio;
     private boolean leida;
 
-    public Notificacion(String id, String usuarioId, String mensaje) {
-        this.id = id;
-        this.usuarioId = usuarioId;
-        this.mensaje = mensaje;
-        this.fecha = LocalDateTime.now();
+    public Notificacion(String idNotificacion, Usuario usuarioDestino, String mensaje)
+            throws ValidacionException {
+        setIdNotificacion(idNotificacion);
+        setUsuarioDestino(usuarioDestino);
+        setMensaje(mensaje);
+        this.fechaEnvio = LocalDateTime.now();
         this.leida = false;
     }
 
-    public String getId() { 
-        return id; 
+    private void validarTextoObligatorio(String valor, String campo) throws ValidacionException {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new ValidacionException("El campo " + campo + " es obligatorio.");
+        }
     }
 
-    public String getUsuarioId() { 
-        return usuarioId; 
+    public String getIdNotificacion() {
+        return idNotificacion;
     }
 
-    public String getMensaje() { 
-        return mensaje; 
+    public void setIdNotificacion(String idNotificacion) throws ValidacionException {
+        validarTextoObligatorio(idNotificacion, "id de notificación");
+        this.idNotificacion = idNotificacion.trim();
     }
 
-    public LocalDateTime getFecha() { 
-        return fecha;
-     }
+    public Usuario getUsuarioDestino() {
+        return usuarioDestino;
+    }
 
-    public boolean isLeida() { 
+    public void setUsuarioDestino(Usuario usuarioDestino) throws ValidacionException {
+        if (usuarioDestino == null) {
+            throw new ValidacionException("El usuario destino es obligatorio.");
+        }
+        this.usuarioDestino = usuarioDestino;
+    }
+
+    public String getMensaje() {
+        return mensaje;
+    }
+
+    public void setMensaje(String mensaje) throws ValidacionException {
+        validarTextoObligatorio(mensaje, "mensaje");
+        this.mensaje = mensaje.trim();
+    }
+
+    public LocalDateTime getFechaEnvio() {
+        return fechaEnvio;
+    }
+
+    public boolean isLeida() {
         return leida;
-     }
-
-    public void marcarLeida() {
-        this.leida = true;
     }
 
-    @Override
-    public String toString() {
-        return "[" + fecha + "] " + mensaje + " -> usuario " + usuarioId +
-                (leida ? " (leída)" : " (no leída)");
+    /**
+     * Marca la notificación como leída.
+     */
+    public void marcarComoLeida() {
+        this.leida = true;
     }
 }

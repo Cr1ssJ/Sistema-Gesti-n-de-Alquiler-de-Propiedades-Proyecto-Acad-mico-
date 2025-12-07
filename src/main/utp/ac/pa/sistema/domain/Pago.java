@@ -1,114 +1,144 @@
 package utp.ac.pa.sistema.domain;
 
-import utp.ac.pa.sistema.utils.IOUtils;
 import java.time.LocalDate;
 import java.util.List;
 
+import utp.ac.pa.sistema.utils.IOUtils;
+
 /**
- * Representa un pago asociado a un contrato de alquiler.
+ * Representa un pago realizado por un inquilino asociado a un contrato.
  */
 public class Pago {
 
-    private String id;
-    private String contratoId;
+    private String idPago;
+    private ContratoAlquiler contrato;
     private LocalDate fechaPago;
     private double monto;
-    private String metodo;
+    private String metodoPago;
+    private String referencia;
+    private boolean aTiempo;
 
-    public Pago(String id, String contratoId, LocalDate fechaPago,
-                double monto, String metodo) {
-        this.id = id;
-        this.contratoId = contratoId;
-        this.fechaPago = fechaPago;
-        this.monto = monto;
-        this.metodo = metodo;
+    public Pago(String idPago, ContratoAlquiler contrato, LocalDate fechaPago,
+                double monto, String metodoPago, String referencia)
+            throws ValidacionException {
+        setIdPago(idPago);
+        setContrato(contrato);
+        setFechaPago(fechaPago);
+        setMonto(monto);
+        setMetodoPago(metodoPago);
+        setReferencia(referencia);
+        // Se calcula si el pago fue a tiempo en base al proximo vencimiento del contrato
+        this.aTiempo = !fechaPago.isAfter(contrato.getProximoVencimiento());
     }
 
-    public String getId() {
-        return id;
+    private void validarTextoObligatorio(String valor, String campo) throws ValidacionException {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new ValidacionException("El campo " + campo + " es obligatorio.");
+        }
     }
 
-    public String getContratoId() {
-        return contratoId;
+    public String getIdPago() {
+        return idPago;
+    }
+
+    public void setIdPago(String idPago) throws ValidacionException {
+        validarTextoObligatorio(idPago, "id de pago");
+        this.idPago = idPago.trim();
+    }
+
+    public ContratoAlquiler getContrato() {
+        return contrato;
+    }
+
+    public void setContrato(ContratoAlquiler contrato) throws ValidacionException {
+        if (contrato == null) {
+            throw new ValidacionException("El contrato asociado al pago es obligatorio.");
+        }
+        this.contrato = contrato;
     }
 
     public LocalDate getFechaPago() {
         return fechaPago;
     }
 
+    public void setFechaPago(LocalDate fechaPago) throws ValidacionException {
+        if (fechaPago == null) {
+            throw new ValidacionException("La fecha de pago es obligatoria.");
+        }
+        this.fechaPago = fechaPago;
+    }
+
     public double getMonto() {
         return monto;
     }
 
-    public String getMetodo() {
-        return metodo;
+    public void setMonto(double monto) throws ValidacionException {
+        if (monto <= 0) {
+            throw new ValidacionException("El monto del pago debe ser mayor a cero.");
+        }
+        this.monto = monto;
+    }
+
+    public String getMetodoPago() {
+        return metodoPago;
+    }
+
+    public void setMetodoPago(String metodoPago) throws ValidacionException {
+        validarTextoObligatorio(metodoPago, "metodo de pago");
+        this.metodoPago = metodoPago.trim();
+    }
+
+    public String getReferencia() {
+        return referencia;
+    }
+
+    public void setReferencia(String referencia) throws ValidacionException {
+        validarTextoObligatorio(referencia, "referencia");
+        this.referencia = referencia.trim();
+    }
+
+    public boolean isATiempo() {
+        return aTiempo;
     }
 
     /**
-     * Registra un pago validando:
-     * - Que exista el contrato
-     * - Que el ID de pago no se repita
-     * - Que el monto sea numérico y > 0
-     * - Que la fecha sea válida
+     * Flujo interactivo para registrar un pago.
      */
     public static void registrarPago(List<ContratoAlquiler> contratos, List<Pago> pagos) {
-
         if (contratos.isEmpty()) {
-            IOUtils.warn("Sin contratos",
-                    "Debe existir al menos un contrato para registrar pagos.");
+            IOUtils.warn("Sin contratos", "Debe crear un contrato antes de registrar pagos.");
             return;
         }
-
-        // Verificar que el contrato exista
-        String contratoId = IOUtils.askNonEmpty("Pago", "ID del contrato:");
-        ContratoAlquiler c = ContratoAlquiler.buscarPorId(contratos, contratoId);
-        if (c == null) {
-            IOUtils.warn("Contrato no encontrado",
-                    "No existe un contrato con ese ID.");
-            return;
-        }
-
-        // ID de pago único
-        String id;
-        while (true) {
-            id = IOUtils.askNonEmpty("Pago", "ID del pago:");
-            boolean existe = false;
-            for (Pago p : pagos) {
-                if (p.id.equals(id)) {
-                    existe = true;
-                    break;
-                }
+        try {
+            String contratoId = IOUtils.askNonEmpty("Registrar pago", "ID del contrato");
+            ContratoAlquiler contrato = contratos.stream()
+                    .filter(c -> c.getIdContrato().equalsIgnoreCase(contratoId))
+                    .findFirst()
+                    .orElse(null);
+            if (contrato == null) {
+                IOUtils.warn("No encontrado", "Contrato no encontrado.");
+                return;
             }
-            if (existe) {
-                IOUtils.warn("ID duplicado",
-                        "Ya existe un pago con ese ID. Ingrese otro.");
-            } else {
-                break;
+
+            String idPago = IOUtils.askNonEmpty("Registrar pago", "ID del pago");
+            if (pagos.stream().anyMatch(p -> p.getIdPago().equalsIgnoreCase(idPago))) {
+                IOUtils.warn("Duplicado", "Ya existe un pago con ese ID.");
+                return;
             }
+
+            LocalDate fecha = IOUtils.askFecha("Registrar pago", "Fecha del pago");
+            double monto = IOUtils.askDouble("Registrar pago", "Monto pagado");
+            String metodo = IOUtils.askNonEmpty("Registrar pago", "Metodo de pago");
+            String referencia = IOUtils.askNonEmpty("Registrar pago", "Referencia");
+
+            Pago pago = new Pago(idPago, contrato, fecha, monto, metodo, referencia);
+            pagos.add(pago);
+            contrato.registrarPago(pago);
+
+            String mensaje = pago.isATiempo() ? "Pago a tiempo." : "Pago fuera de fecha.";
+            IOUtils.info("Pago registrado", mensaje);
+        } catch (ValidacionException e) {
+            IOUtils.warn("Error", e.getMessage());
         }
-
-        // Fecha de pago
-        LocalDate fecha = IOUtils.askFecha("Pago", "Fecha de pago");
-
-        // Monto (solo números, mayor que 0)
-        double monto = IOUtils.askDouble("Pago", "Monto del pago:");
-        if (monto <= 0) {
-            IOUtils.warn("Monto inválido", "El monto debe ser mayor que 0.");
-            return;
-        }
-
-        String metodo = IOUtils.askNonEmpty("Pago",
-                "Método de pago (efectivo, transferencia, etc.):");
-
-        Pago p = new Pago(id, contratoId, fecha, monto, metodo);
-        c.registrarPago(p);
-        pagos.add(p);
-
-        IOUtils.info("OK", "Pago registrado:\n" + p);
-    }
-
-    @Override
-    public String toString() {
-        return "Pago{" + id + ", $" + monto + ", " + fechaPago + ", " + metodo + "}";
     }
 }

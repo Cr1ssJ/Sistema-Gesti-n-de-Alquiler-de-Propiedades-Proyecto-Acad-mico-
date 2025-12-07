@@ -1,106 +1,99 @@
 package utp.ac.pa.sistema.domain;
 
-import utp.ac.pa.sistema.utils.IOUtils;
 import java.util.List;
 
+import utp.ac.pa.sistema.utils.IOUtils;
+
 /**
- * Clase responsable de generar reportes del sistema.
+ * Servicio encargado de generar diferentes reportes de texto
+ * sobre contratos, pagos y solicitudes.
  */
 public class GestorReportes {
 
+    /**
+     * Genera un reporte de contratos filtrados por estado.
+     */
+    public String generarReporteContratosPorEstado(EstadoContrato estado,
+                                                   List<ContratoAlquiler> contratos) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("REPORTE DE CONTRATOS - ESTADO: ").append(estado).append("\n");
+        sb.append("=======================================\n");
+        for (ContratoAlquiler c : contratos) {
+            if (c.getEstado() == estado) {
+                sb.append("Contrato: ").append(c.getIdContrato())
+                  .append(" | Propiedad: ").append(c.getPropiedad().getIdPropiedad())
+                  .append(" | Inquilino: ").append(c.getInquilino().getNombreCompleto())
+                  .append(" | Monto Mensual: ").append(c.getMontoMensual())
+                  .append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Genera un reporte de pagos asociados a un contrato.
+     */
+    public String generarReportePagosPorContrato(ContratoAlquiler contrato) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("REPORTE DE PAGOS - CONTRATO: ").append(contrato.getIdContrato()).append("\n");
+        sb.append("=======================================\n");
+        for (Pago p : contrato.getPagos()) {
+            sb.append("Pago: ").append(p.getIdPago())
+              .append(" | Fecha: ").append(p.getFechaPago())
+              .append(" | Monto: ").append(p.getMonto())
+              .append(" | Método: ").append(p.getMetodoPago())
+              .append(" | A tiempo: ").append(p.isATiempo())
+              .append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Genera un reporte de solicitudes de mantenimiento filtradas por estado.
+     */
+    public String generarReporteSolicitudesPorEstado(EstadoSolicitud estado,
+                                                     List<SolicitudMantenimiento> solicitudes) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("REPORTE DE SOLICITUDES - ESTADO: ").append(estado).append("\n");
+        sb.append("=======================================\n");
+        for (SolicitudMantenimiento s : solicitudes) {
+            if (s.getEstado() == estado) {
+                sb.append("Solicitud: ").append(s.getIdSolicitud())
+                  .append(" | Contrato: ").append(s.getContrato().getIdContrato())
+                  .append(" | Descripción: ").append(s.getDescripcionProblema())
+                  .append(" | Fecha: ").append(s.getFechaSolicitud())
+                  .append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Muestra un resumen rapido del sistema.
+     */
     public static void mostrarResumen(List<Propiedad> propiedades,
                                       List<Inquilino> inquilinos,
                                       List<ContratoAlquiler> contratos,
                                       List<Pago> pagos,
                                       List<SolicitudMantenimiento> tickets) {
-
-        int contratosActivos = 0;
-        int contratosFinalizados = 0;
-        int contratosCancelados = 0;
-
-        for (ContratoAlquiler c : contratos) {
-            if (c.getEstado() == ContratoAlquiler.Estado.ACTIVO) {
-                contratosActivos++;
-            } else if (c.getEstado() == ContratoAlquiler.Estado.FINALIZADO) {
-                contratosFinalizados++;
-            } else if (c.getEstado() == ContratoAlquiler.Estado.CANCELADO) {
-                contratosCancelados++;
-            }
-        }
-
-        int ticketsRegistrados = 0;
-        int ticketsEnProceso = 0;
-        int ticketsResueltos = 0;
-
-        for (SolicitudMantenimiento t : tickets) {
-            if (t.getEstado() == SolicitudMantenimiento.Estado.REGISTRADA) {
-                ticketsRegistrados++;
-            } else if (t.getEstado() == SolicitudMantenimiento.Estado.EN_PROCESO) {
-                ticketsEnProceso++;
-            } else if (t.getEstado() == SolicitudMantenimiento.Estado.RESUELTA) {
-                ticketsResueltos++;
-            }
-        }
-
-        double totalCobrado = 0;
-        for (Pago p : pagos) {
-            totalCobrado += p.getMonto();
-        }
-
         StringBuilder sb = new StringBuilder();
-        sb.append("=== RESUMEN GENERAL ===\n");
         sb.append("Propiedades: ").append(propiedades.size()).append("\n");
         sb.append("Inquilinos: ").append(inquilinos.size()).append("\n");
         sb.append("Contratos: ").append(contratos.size()).append("\n");
-        sb.append("Pagos registrados: ").append(pagos.size()).append("\n");
-        sb.append("Tickets de mantenimiento: ").append(tickets.size()).append("\n\n");
+        sb.append("Pagos: ").append(pagos.size()).append("\n");
+        sb.append("Tickets: ").append(tickets.size()).append("\n\n");
 
-        sb.append("=== CONTRATOS POR ESTADO ===\n");
-        sb.append("Activos: ").append(contratosActivos).append("\n");
-        sb.append("Finalizados: ").append(contratosFinalizados).append("\n");
-        sb.append("Cancelados: ").append(contratosCancelados).append("\n\n");
+        long contratosVigentes = contratos.stream()
+                .filter(c -> c.getEstado() == EstadoContrato.VIGENTE).count();
+        long contratosVencidos = contratos.stream()
+                .filter(c -> c.getEstado() == EstadoContrato.VENCIDO).count();
+        sb.append("Contratos vigentes: ").append(contratosVigentes).append("\n");
+        sb.append("Contratos vencidos: ").append(contratosVencidos).append("\n");
 
-        sb.append("=== TICKETS POR ESTADO ===\n");
-        sb.append("Registrados: ").append(ticketsRegistrados).append("\n");
-        sb.append("En proceso: ").append(ticketsEnProceso).append("\n");
-        sb.append("Resueltos: ").append(ticketsResueltos).append("\n\n");
-
-        sb.append("Monto total cobrado en pagos: $")
-          .append(String.format("%.2f", totalCobrado)).append("\n\n");
-
-        // Últimos contratos
-        if (!contratos.isEmpty()) {
-            sb.append("=== ÚLTIMOS CONTRATOS ===\n");
-            int inicio = Math.max(0, contratos.size() - 3);
-            for (int i = inicio; i < contratos.size(); i++) {
-                ContratoAlquiler c = contratos.get(i);
-                sb.append("- [").append(c.getId()).append("] ")
-                  .append(c.getFechaInicio()).append(" -> ")
-                  .append(c.getFechaFin())
-                  .append(" | Propiedad: ").append(c.getPropiedad().getId())
-                  .append(" | Inquilino: ").append(c.getInquilino().getNombreUsuario())
-                  .append(" | Estado: ").append(c.getEstado())
-                  .append("\n");
-            }
-            sb.append("\n");
-        }
-
-        // Últimos tickets
-        if (!tickets.isEmpty()) {
-            sb.append("=== ÚLTIMOS TICKETS ===\n");
-            int inicio = Math.max(0, tickets.size() - 3);
-            for (int i = inicio; i < tickets.size(); i++) {
-                SolicitudMantenimiento t = tickets.get(i);
-                sb.append("- [").append(t.getId()).append("] ")
-                  .append(t.getFechaCreacion()).append(" | Propiedad: ")
-                  .append(t.getPropiedad().getId())
-                  .append(" | Estado: ").append(t.getEstado())
-                  .append("\n  Descripción: ").append(t.getDescripcion())
-                  .append("\n");
-            }
-        }
+        long ticketsPendientes = tickets.stream()
+                .filter(t -> t.getEstado() == EstadoSolicitud.PENDIENTE).count();
+        sb.append("Tickets pendientes: ").append(ticketsPendientes).append("\n");
 
         IOUtils.info("Resumen del sistema", sb.toString());
     }
-
 }

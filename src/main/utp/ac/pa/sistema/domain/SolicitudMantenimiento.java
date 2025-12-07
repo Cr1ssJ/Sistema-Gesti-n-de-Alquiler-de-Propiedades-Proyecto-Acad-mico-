@@ -1,163 +1,211 @@
 package utp.ac.pa.sistema.domain;
 
-import utp.ac.pa.sistema.utils.IOUtils;
 import java.time.LocalDate;
 import java.util.List;
 
+import utp.ac.pa.sistema.utils.IOUtils;
+
 /**
- * Representa una solicitud de mantenimiento sobre una propiedad.
+ * Representa una solicitud de mantenimiento hecha por un inquilino.
  */
 public class SolicitudMantenimiento {
 
-    public enum Estado { REGISTRADA, EN_PROCESO, RESUELTA }
+    private String idSolicitud;
+    private ContratoAlquiler contrato;
+    private Tecnico tecnicoAsignado;
+    private String descripcionProblema;
+    private LocalDate fechaSolicitud;
+    private LocalDate fechaAtencion;
+    private EstadoSolicitud estado;
 
-    private String id;
-    private Propiedad propiedad;
-    private Inquilino solicitadoPor;
-    private String descripcion;
-    private LocalDate fechaCreacion;
-    private Estado estado;
-
-    public SolicitudMantenimiento(String id,
-                                  Propiedad propiedad,
-                                  Inquilino solicitadoPor,
-                                  String descripcion) {
-        this.id = id;
-        this.propiedad = propiedad;
-        this.solicitadoPor = solicitadoPor;
-        this.descripcion = descripcion;
-        this.fechaCreacion = LocalDate.now();
-        this.estado = Estado.REGISTRADA;
+    public SolicitudMantenimiento(String idSolicitud, ContratoAlquiler contrato,
+                                  String descripcionProblema)
+            throws ValidacionException {
+        setIdSolicitud(idSolicitud);
+        setContrato(contrato);
+        setDescripcionProblema(descripcionProblema);
+        this.fechaSolicitud = LocalDate.now();
+        this.estado = EstadoSolicitud.PENDIENTE;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Propiedad getPropiedad() {
-        return propiedad;
-    }
-
-    public Inquilino getSolicitadoPor() {
-        return solicitadoPor;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public LocalDate getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public Estado getEstado() {
-        return estado;
-    }
-
-    public void cambiarEstado(Estado nuevoEstado) {
-        this.estado = nuevoEstado;
-    }
-
-    public static SolicitudMantenimiento buscarPorId(
-            List<SolicitudMantenimiento> tickets, String id) {
-        for (SolicitudMantenimiento t : tickets) {
-            if (t.id.equals(id)) {
-                return t;
-            }
+    private void validarTextoObligatorio(String valor, String campo) throws ValidacionException {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new ValidacionException("El campo " + campo + " es obligatorio.");
         }
-        return null;
     }
 
-    public static void registrarSolicitud(List<Propiedad> propiedades,
-                                          List<Inquilino> inquilinos,
-                                          List<SolicitudMantenimiento> tickets) {
+    public String getIdSolicitud() {
+        return idSolicitud;
+    }
 
-        if (propiedades.isEmpty() || inquilinos.isEmpty()) {
-            IOUtils.warn("Datos insuficientes",
-                    "Debe existir al menos una propiedad y un inquilino antes de registrar un ticket.");
-            return;
+    public void setIdSolicitud(String idSolicitud) throws ValidacionException {
+        validarTextoObligatorio(idSolicitud, "id de solicitud");
+        this.idSolicitud = idSolicitud.trim();
+    }
+
+    public ContratoAlquiler getContrato() {
+        return contrato;
+    }
+
+    public void setContrato(ContratoAlquiler contrato) throws ValidacionException {
+        if (contrato == null) {
+            throw new ValidacionException("El contrato de la solicitud es obligatorio.");
         }
+        this.contrato = contrato;
+    }
 
-        // ID único
-        String id;
-        while (true) {
-            id = IOUtils.askNonEmpty("Ticket", "ID del ticket:");
-            if (buscarPorId(tickets, id) != null) {
-                IOUtils.warn("ID duplicado",
-                        "Ya existe una solicitud con ese ID. Ingrese otro.");
-            } else {
-                break;
-            }
-        }
-
-        String idProp = IOUtils.askNonEmpty("Ticket", "ID de la propiedad:");
-        Propiedad prop = Propiedad.buscarPorId(propiedades, idProp);
-        if (prop == null) {
-            IOUtils.warn("Propiedad no encontrada", "No existe una propiedad con ese ID.");
-            return;
-        }
-
-        String idInq = IOUtils.askNonEmpty("Ticket",
-                "ID del inquilino que reporta:");
-        Inquilino inq = Inquilino.buscarPorId(inquilinos, idInq);
-        if (inq == null) {
-            IOUtils.warn("Inquilino no encontrado",
-                    "No existe un inquilino con ese ID.");
-            return;
-        }
-
-        String desc = IOUtils.askNonEmpty("Ticket", "Descripción del problema:");
-
-        SolicitudMantenimiento sm = new SolicitudMantenimiento(id, prop, inq, desc);
-        tickets.add(sm);
-
-        IOUtils.info("OK", "Solicitud registrada:\n" + sm);
+    public Tecnico getTecnicoAsignado() {
+        return tecnicoAsignado;
     }
 
     /**
-     * Cambia manualmente el estado de un ticket.
+     * Asigna un técnico y cambia el estado a EN_CURSO.
+     */
+    public void asignarTecnico(Tecnico tecnicoAsignado) throws ValidacionException {
+        if (tecnicoAsignado == null) {
+            throw new ValidacionException("El técnico asignado no puede ser nulo.");
+        }
+        this.tecnicoAsignado = tecnicoAsignado;
+        this.estado = EstadoSolicitud.EN_CURSO;
+    }
+
+    public String getDescripcionProblema() {
+        return descripcionProblema;
+    }
+
+    public void setDescripcionProblema(String descripcionProblema) throws ValidacionException {
+        validarTextoObligatorio(descripcionProblema, "descripción del problema");
+        this.descripcionProblema = descripcionProblema.trim();
+    }
+
+    public LocalDate getFechaSolicitud() {
+        return fechaSolicitud;
+    }
+
+    public LocalDate getFechaAtencion() {
+        return fechaAtencion;
+    }
+
+    public EstadoSolicitud getEstado() {
+        return estado;
+    }
+
+    /**
+     * Marca la solicitud como resuelta y registra la fecha de atención.
+     */
+    public void marcarResuelta() {
+        this.estado = EstadoSolicitud.RESUELTA;
+        this.fechaAtencion = LocalDate.now();
+    }
+
+    /**
+     * Cancela la solicitud.
+     */
+    public void cancelar() {
+        this.estado = EstadoSolicitud.CANCELADA;
+    }
+
+    /**
+     * Flujo interactivo para registrar una solicitud de mantenimiento.
+     * No se dispone de la lista de contratos en este metodo (ver Main),
+     * por lo que se crea un contrato ligero con los datos proporcionados.
+     */
+    public static void registrarSolicitud(List<Propiedad> propiedades,
+                                          List<Inquilino> inquilinos,
+                                          List<SolicitudMantenimiento> tickets) {
+        if (propiedades.isEmpty() || inquilinos.isEmpty()) {
+            IOUtils.warn("Datos faltantes",
+                    "Debe haber al menos una propiedad y un inquilino registrados.");
+            return;
+        }
+        try {
+            String propId = IOUtils.askNonEmpty("Solicitud", "ID de la propiedad");
+            Propiedad prop = propiedades.stream()
+                    .filter(p -> p.getIdPropiedad().equalsIgnoreCase(propId))
+                    .findFirst()
+                    .orElse(null);
+            if (prop == null) {
+                IOUtils.warn("No encontrada", "Propiedad no encontrada.");
+                return;
+            }
+
+            String inqId = IOUtils.askNonEmpty("Solicitud", "ID del inquilino");
+            Inquilino inq = inquilinos.stream()
+                    .filter(i -> i.getId().equalsIgnoreCase(inqId))
+                    .findFirst()
+                    .orElse(null);
+            if (inq == null) {
+                IOUtils.warn("No encontrado", "Inquilino no encontrado.");
+                return;
+            }
+
+            String descripcion = IOUtils.askNonEmpty("Solicitud",
+                    "Describa el problema de mantenimiento");
+
+            // Contrato ligero para asociar la solicitud
+            LocalDate inicio = LocalDate.now();
+            LocalDate fin = inicio.plusMonths(12);
+            double monto = prop.calcularPrecioTotalMensual();
+            ContratoAlquiler contratoLigero = new ContratoAlquiler(
+                    "CT-" + System.currentTimeMillis(), prop, inq, inicio, fin, monto, 5);
+
+            String idTicket = "TCK-" + (tickets.size() + 1);
+            SolicitudMantenimiento ticket = new SolicitudMantenimiento(
+                    idTicket, contratoLigero, descripcion);
+            tickets.add(ticket);
+            IOUtils.info("OK", "Solicitud registrada con ID " + idTicket);
+        } catch (ValidacionException e) {
+            IOUtils.warn("Error", e.getMessage());
+        }
+    }
+
+    /**
+     * Permite cambiar el estado de una solicitud.
      */
     public static void cambiarEstadoInteractivo(List<SolicitudMantenimiento> tickets) {
         if (tickets.isEmpty()) {
-            IOUtils.warn("Sin tickets", "No hay solicitudes registradas.");
+            IOUtils.info("Solicitudes", "No hay solicitudes registradas.");
+            return;
+        }
+        String id = IOUtils.askNonEmpty("Ticket", "ID de la solicitud (TCK-..)");
+        SolicitudMantenimiento ticket = tickets.stream()
+                .filter(t -> t.getIdSolicitud().equalsIgnoreCase(id))
+                .findFirst()
+                .orElse(null);
+        if (ticket == null) {
+            IOUtils.warn("No encontrada", "Solicitud no encontrada.");
             return;
         }
 
-        String id = IOUtils.askNonEmpty("Ticket", "ID del ticket a actualizar:");
-        SolicitudMantenimiento t = buscarPorId(tickets, id);
-        if (t == null) {
-            IOUtils.warn("No encontrado", "No existe ticket con ese ID.");
-            return;
-        }
-
-        String msg = "Ticket: " + t.id +
-                "\nPropiedad: " + t.propiedad.getId() +
-                "\nInquilino: " + t.solicitadoPor.getNombreUsuario() +
-                "\nEstado actual: " + t.estado +
-                "\n\nSeleccione nuevo estado:\n" +
-                "1. REGISTRADA\n" +
-                "2. EN_PROCESO\n" +
-                "3. RESUELTA";
-
-        int opcion = IOUtils.askInt("Cambio de estado", msg);
-        switch (opcion) {
-            case 1 -> t.cambiarEstado(Estado.REGISTRADA);
-            case 2 -> t.cambiarEstado(Estado.EN_PROCESO);
-            case 3 -> t.cambiarEstado(Estado.RESUELTA);
-            default -> {
-                IOUtils.warn("Opción inválida", "No se realizó ningún cambio.");
-                return;
+        String opcion = IOUtils.askNonEmpty("Actualizar solicitud",
+                "1=Asignar tecnico, 2=Marcar resuelta, 3=Cancelar");
+        try {
+            switch (opcion) {
+                case "1" -> {
+                    String techId = IOUtils.askNonEmpty("Tecnico", "ID");
+                    String techNombre = IOUtils.askSoloLetras("Tecnico", "Nombre completo");
+                    String techEmail = IOUtils.askEmail("Tecnico", "Email");
+                    String techTel = IOUtils.askSoloDigitos("Tecnico", "Telefono");
+                    String techUser = IOUtils.askNonEmpty("Tecnico", "Usuario");
+                    String techPass = IOUtils.askNonEmpty("Tecnico", "Contrasena (min 6 chars)");
+                    String techEsp = IOUtils.askNonEmpty("Tecnico", "Especialidad");
+                    Tecnico tecnico = new Tecnico(
+                            techId, techNombre, techEmail, techTel, techUser, techPass, techEsp);
+                    ticket.asignarTecnico(tecnico);
+                    IOUtils.info("OK", "Tecnico asignado.");
+                }
+                case "2" -> {
+                    ticket.marcarResuelta();
+                    IOUtils.info("OK", "Solicitud marcada como resuelta.");
+                }
+                case "3" -> {
+                    ticket.cancelar();
+                    IOUtils.info("OK", "Solicitud cancelada.");
+                }
+                default -> IOUtils.warn("Opcion invalida", "No se realizaron cambios.");
             }
+        } catch (ValidacionException e) {
+            IOUtils.warn("Error", e.getMessage());
         }
-
-        IOUtils.info("Estado actualizado",
-                "Nuevo estado del ticket " + t.id + ": " + t.estado);
-    }
-
-    @Override
-    public String toString() {
-        return "Ticket{" + id + ", prop=" + propiedad.getId() +
-                ", por=" + solicitadoPor.getNombreUsuario() +
-                ", estado=" + estado + "}";
     }
 }
