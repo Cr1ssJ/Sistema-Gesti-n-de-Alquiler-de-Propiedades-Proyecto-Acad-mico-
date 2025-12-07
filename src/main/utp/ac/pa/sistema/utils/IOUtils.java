@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.time.LocalDate;
 
 /**
- * Clase de utilidades de entrada/salida.
- * Envuelve JOptionPane y BufferedReader para reutilizar código.
+ * Utilidades de entrada/salida.
+ * Envuelve JOptionPane y consola para reusar codigo.
  */
 public class IOUtils {
 
@@ -16,7 +16,7 @@ public class IOUtils {
             new BufferedReader(new InputStreamReader(System.in));
 
     /**
-     * Método genérico para pedir un dato al usuario.
+     * Metodo generico para pedir un dato al usuario.
      * Intenta usar JOptionPane y, si no es posible, cae a consola.
      */
     public static String ask(String titulo, String mensaje) {
@@ -24,39 +24,39 @@ public class IOUtils {
             String input = JOptionPane.showInputDialog(
                     null, mensaje, titulo, JOptionPane.QUESTION_MESSAGE);
             if (input == null) {
-                // Usuario canceló: devolvemos cadena vacía para no romper la ejecución
+                // Usuario cancelo: devolvemos cadena vacia para no romper la ejecucion
                 return "";
             }
             return input.trim();
         } catch (Throwable t) {
-            // Si por alguna razón no hay entorno gráfico, usamos consola
+            // Si no hay entorno grafico, usamos consola
             return readLineConsole(mensaje + ": ");
         }
     }
 
     /**
-     * Pide una cadena no vacía.
+     * Pide una cadena no vacia.
      */
     public static String askNonEmpty(String titulo, String mensaje) {
         String valor;
         do {
             valor = ask(titulo, mensaje);
             if (valor == null || valor.isBlank()) {
-                warn("Dato obligatorio", "El campo no puede estar vacío.");
+                warn("Dato obligatorio", "El campo no puede estar vacio.");
             }
         } while (valor == null || valor.isBlank());
         return valor;
     }
 
     /**
-     * Pide un texto que sólo contenga letras y espacios.
+     * Pide un texto que solo contenga letras y espacios.
      */
     public static String askSoloLetras(String titulo, String mensaje) {
         String valor;
         do {
             valor = askNonEmpty(titulo, mensaje);
-            if (!valor.matches("[A-Za-zÁÉÍÓÚáéíóúÑñ ]+")) {
-                warn("Formato inválido", "Solo se permiten letras y espacios.");
+            if (!valor.matches("[A-Za-z ]+")) {
+                warn("Formato invalido", "Solo se permiten letras y espacios.");
                 valor = null;
             }
         } while (valor == null);
@@ -64,14 +64,14 @@ public class IOUtils {
     }
 
     /**
-     * Pide una cadena que sólo contenga dígitos (útil para teléfonos, cédulas simples, etc.).
+     * Pide una cadena que solo contenga digitos (util para telefonos, etc.).
      */
     public static String askSoloDigitos(String titulo, String mensaje) {
         String valor;
         do {
             valor = askNonEmpty(titulo, mensaje);
             if (!valor.matches("\\d+")) {
-                warn("Formato inválido", "Solo se permiten números (0-9).");
+                warn("Formato invalido", "Solo se permiten numeros (0-9).");
                 valor = null;
             }
         } while (valor == null);
@@ -79,13 +79,13 @@ public class IOUtils {
     }
 
     /**
-     * Pide un correo electrónico con una validación sencilla.
+     * Pide un correo electronico con una validacion sencilla.
      */
     public static String askEmail(String titulo, String mensaje) {
         String valor;
         do {
             valor = askNonEmpty(titulo, mensaje);
-            // Validación simple: debe contener una sola '@' y al menos un punto después
+            // Validacion simple: debe contener una sola '@' y al menos un punto despues
             if (!valor.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
                 warn("Email inválido",
                         "Ingrese un correo electrónico válido (ej: usuario@dominio.com).");
@@ -96,7 +96,7 @@ public class IOUtils {
     }
 
     /**
-     * Pide un número entero (int) válido.
+     * Pide un numero entero (int) valido.
      */
     public static int askInt(String titulo, String mensaje) {
         while (true) {
@@ -104,13 +104,13 @@ public class IOUtils {
             try {
                 return Integer.parseInt(s);
             } catch (NumberFormatException e) {
-                warn("Número inválido", "Debe ingresar un número entero.");
+                warn("Numero invalido", "Debe ingresar un numero entero.");
             }
         }
     }
 
     /**
-     * Pide un número decimal (double) válido.
+     * Pide un numero decimal (double) valido.
      */
     public static double askDouble(String titulo, String mensaje) {
         while (true) {
@@ -118,8 +118,8 @@ public class IOUtils {
             try {
                 return Double.parseDouble(s);
             } catch (NumberFormatException e) {
-                warn("Número inválido",
-                        "Debe ingresar un número válido (use punto decimal si es necesario).");
+                warn("Numero invalido",
+                        "Debe ingresar un numero valido (use punto decimal si es necesario).");
             }
         }
     }
@@ -133,14 +133,14 @@ public class IOUtils {
             try {
                 return LocalDate.parse(s);
             } catch (Exception e) {
-                warn("Fecha inválida",
+                warn("Fecha invalida",
                         "La fecha debe tener el formato yyyy-MM-dd, por ejemplo 2025-12-01.");
             }
         }
     }
 
     /**
-     * Lee una línea desde consola (fallback cuando no se puede usar GUI).
+     * Lee una linea desde consola (fallback cuando no se puede usar GUI).
      */
     public static String readLineConsole(String mensaje) {
         System.out.print(mensaje);
@@ -153,8 +153,7 @@ public class IOUtils {
     }
 
     /**
-     * Conversión segura de String a double con valor por defecto.
-     * (Se mantiene por compatibilidad, pero se recomienda usar askDouble).
+     * Conversion segura de String a double con valor por defecto.
      */
     public static double toDouble(String s, double def) {
         try {
