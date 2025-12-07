@@ -1,6 +1,11 @@
 package utp.ac.pa.sistema;
 
-import utp.ac.pa.sistema.domain.*;
+import utp.ac.pa.sistema.domain.ContratoAlquiler;
+import utp.ac.pa.sistema.domain.GestorReportes;
+import utp.ac.pa.sistema.domain.Inquilino;
+import utp.ac.pa.sistema.domain.Pago;
+import utp.ac.pa.sistema.domain.Propiedad;
+import utp.ac.pa.sistema.domain.SolicitudMantenimiento;
 import utp.ac.pa.sistema.utils.IOUtils;
 
 import java.util.ArrayList;
@@ -22,24 +27,24 @@ public class Main {
         while (run) {
 
             String menu = """
-                    === SISTEMA DE GESTIÓN DE ALQUILERES ===
+                    === SISTEMA DE GESTION DE ALQUILERES ===
                     
                     1. Registrar propiedad
                     2. Registrar inquilino
                     3. Crear contrato de alquiler
                     4. Registrar pago
-                    5. Registrar solicitud de mantenimiento           
-                    6. Ver resumen del sistema               
+                    5. Registrar solicitud de mantenimiento
+                    6. Ver resumen del sistema
                     7. Cambiar estado de contrato
-                    8. Cambiar estado de ticket de mantenimiento      
+                    8. Cambiar estado de ticket de mantenimiento
                     9. Listar propiedades disponibles
-                    10. Listar inquilinos      
+                    10. Listar inquilinos
                     0. Salir
                     
-                    Seleccione una opción:
+                    Seleccione una opcion:
                     """;
 
-            String opcion = IOUtils.ask("Menú principal", menu);
+            String opcion = IOUtils.ask("Menu principal", menu);
 
             switch (opcion) {
                 case "1" -> Propiedad.registrarPropiedad(propiedades);
@@ -59,7 +64,7 @@ public class Main {
 
                 case "0" -> run = false;
 
-                default -> IOUtils.warn("Opción inválida", "Por favor elija una opción válida.");
+                default -> IOUtils.warn("Opcion invalida", "Por favor elija una opcion valida.");
             }
         }
 
