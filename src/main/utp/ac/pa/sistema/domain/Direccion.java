@@ -11,8 +11,6 @@ public class Direccion {
     private String barrio;
     private String calle;
     private String numero;
-    private String codigoPostal;
-
     public Direccion(String pais, String provincia, String ciudad,
                      String barrio, String calle, String numero,
                      String codigoPostal) {
@@ -22,7 +20,6 @@ public class Direccion {
         this.barrio = barrio;
         this.calle = calle;
         this.numero = numero;
-        this.codigoPostal = codigoPostal;
     }
 
     public String getCiudad() { 

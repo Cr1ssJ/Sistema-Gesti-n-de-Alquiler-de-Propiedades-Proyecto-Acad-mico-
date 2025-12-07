@@ -67,7 +67,7 @@ public class Inquilino extends Usuario {
             sb.append("No hay inquilinos registrados.\n");
         } else {
             for (Inquilino i : lista) {
-                sb.append("- ID: ").append(i.id)
+                sb.append("- Cédula(ID): ").append(i.id)
                   .append(" | Nombre: ").append(i.nombreUsuario)
                   .append(" | Email: ").append(i.email)
                   .append(" | Tel: ").append(i.telefono)
