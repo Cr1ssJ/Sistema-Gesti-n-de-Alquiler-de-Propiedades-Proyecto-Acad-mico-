@@ -191,6 +191,27 @@ public class Propiedad {
             Propiedad nueva = new Propiedad(
                     id, direccion, tipo, metros, precioBase, propietario);
 
+            // Agregar servicios incluidos (opcional)
+            while (true) {
+                String agregar = IOUtils.askNonEmpty("Propiedad", "¿Desea agregar un servicio incluido? (s/n)");
+                if (agregar.equalsIgnoreCase("s")) {
+                    try {
+                        String nombreServ = IOUtils.askSoloLetras("Servicio", "Nombre del servicio");
+                        String descServ = IOUtils.askNonEmpty("Servicio", "Descripcion del servicio");
+                        double costoServ = IOUtils.askPositiveDouble("Servicio", "Costo mensual del servicio");
+                        ServicioIncluido servicio = new ServicioIncluido(nombreServ, descServ, costoServ);
+                        nueva.agregarServicioIncluido(servicio);
+                        IOUtils.info("Servicio agregado", "Se agrego el servicio: " + nombreServ);
+                    } catch (ValidacionException e) {
+                        IOUtils.warn("Error", e.getMessage());
+                    }
+                } else if (agregar.equalsIgnoreCase("n")) {
+                    break;
+                } else {
+                    IOUtils.warn("Opcion invalida", "Responda 's' para si o 'n' para no.");
+                }
+            }
+
             propiedades.add(nueva);
             IOUtils.info("OK", "Propiedad registrada con exito.");
         } catch (ValidacionException e) {
