@@ -161,7 +161,7 @@ public class Propiedad {
             TipoPropiedad tipo = TipoPropiedad.fromString(tipoTxt);
 
             double metros = IOUtils.askDouble("Propiedad", "Metros cuadrados");
-            double precioBase = IOUtils.askDouble("Propiedad", "Precio mensual base");
+            double precioBase = IOUtils.askPositiveDouble("Propiedad", "Precio mensual base");
 
             // Datos basicos del propietario
             String propietarioId = IOUtils.askNonEmpty("Propietario", "ID del propietario");

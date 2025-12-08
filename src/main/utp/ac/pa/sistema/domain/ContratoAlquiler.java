@@ -219,12 +219,12 @@ public class ContratoAlquiler {
 
             LocalDate inicio = IOUtils.askFecha("Crear contrato", "Fecha de inicio");
             LocalDate fin = IOUtils.askFecha("Crear contrato", "Fecha de fin");
-            double monto = IOUtils.askDouble("Crear contrato",
+            double monto = IOUtils.askPositiveDouble("Crear contrato",
                     "Monto mensual (sugerido: " + prop.calcularPrecioTotalMensual() + ")");
 
             int diaCorte;
             while (true) {
-                diaCorte = IOUtils.askInt("Crear contrato", "Dia de corte (1-28)");
+                diaCorte = IOUtils.askPositiveInt("Crear contrato", "Dia de corte (1-28)");
                 if (diaCorte >= 1 && diaCorte <= 28) break;
                 IOUtils.warn("Dato invalido", "El dia de corte debe estar entre 1 y 28.");
             }
