@@ -87,8 +87,8 @@ public class IOUtils {
             valor = askNonEmpty(titulo, mensaje);
             // Validacion simple: debe contener una sola '@' y al menos un punto despues
             if (!valor.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-                warn("Email inválido",
-                        "Ingrese un correo electrónico válido (ej: usuario@dominio.com).");
+                warn("Email invalido",
+                        "Correo electronico invalido. Verifique el formato (ej: usuario@dominio.com).");
                 valor = null;
             }
         } while (valor == null);
@@ -121,6 +121,62 @@ public class IOUtils {
                 warn("Numero invalido",
                         "Debe ingresar un numero valido (use punto decimal si es necesario).");
             }
+        }
+    }
+
+    /**
+     * Pide una cedula con formato x-xxxx-xxxx donde:
+     * - primer bloque: 1 a 10
+     * - segundo y tercero: 1 a 4 digitos.
+     */
+    public static String askCedula(String titulo, String mensaje) {
+        while (true) {
+            String valor = askNonEmpty(titulo, mensaje + " (ej: 8-123-4567)");
+            if (valor.matches("(10|[1-9])-\\d{1,4}-\\d{1,4}")) {
+                return valor;
+            }
+            warn("Formato invalido",
+                    "Formato de cedula invalido. Ej: 1-2023-2324 (primer bloque 1-10; demas 1-4 digitos).");
+        }
+    }
+
+    /**
+     * Pide solo digitos con una longitud minima.
+     */
+    public static String askSoloDigitosMinLength(String titulo, String mensaje, int minLength) {
+        while (true) {
+            String valor = askSoloDigitos(titulo, mensaje);
+            if (valor.length() >= minLength) {
+                return valor;
+            }
+            warn("Formato invalido",
+                    "El valor debe contener solo numeros y tener al menos " + minLength + " digitos.");
+        }
+    }
+
+    /**
+     * Pide un numero decimal mayor a cero.
+     */
+    public static double askPositiveDouble(String titulo, String mensaje) {
+        while (true) {
+            double valor = askDouble(titulo, mensaje);
+            if (valor > 0) {
+                return valor;
+            }
+            warn("Numero invalido", "El valor debe ser mayor a cero.");
+        }
+    }
+
+    /**
+     * Pide un entero mayor a cero.
+     */
+    public static int askPositiveInt(String titulo, String mensaje) {
+        while (true) {
+            int valor = askInt(titulo, mensaje);
+            if (valor > 0) {
+                return valor;
+            }
+            warn("Numero invalido", "El valor debe ser mayor a cero.");
         }
     }
 
