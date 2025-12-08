@@ -127,7 +127,7 @@ public class Pago {
             }
 
             LocalDate fecha = IOUtils.askFecha("Registrar pago", "Fecha del pago");
-            double monto = IOUtils.askDouble("Registrar pago", "Monto pagado");
+            double monto = IOUtils.askPositiveDouble("Registrar pago", "Monto pagado");
             String metodo = IOUtils.askNonEmpty("Registrar pago", "Metodo de pago");
             String referencia = IOUtils.askNonEmpty("Registrar pago", "Referencia");
 

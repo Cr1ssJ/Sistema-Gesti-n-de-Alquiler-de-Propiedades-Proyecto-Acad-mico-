@@ -20,15 +20,27 @@ public class Inquilino extends Usuario {
      */
     public static void registrarInquilino(List<Inquilino> inquilinos) {
         try {
-            String id = IOUtils.askNonEmpty("Registrar inquilino", "ID del inquilino");
+            String id = IOUtils.askCedula("Registrar inquilino", "ID (Cedula) del inquilino");
             if (inquilinos.stream().anyMatch(i -> i.getId().equalsIgnoreCase(id))) {
                 IOUtils.warn("Duplicado", "Ya existe un inquilino con ese ID.");
                 return;
             }
             String nombre = IOUtils.askSoloLetras("Registrar inquilino", "Nombre completo");
             String email = IOUtils.askEmail("Registrar inquilino", "Email");
-            String telefono = IOUtils.askSoloDigitos("Registrar inquilino", "Telefono");
+            if (inquilinos.stream().anyMatch(i -> i.getEmail().equalsIgnoreCase(email))) {
+                IOUtils.warn("Duplicado", "Ya existe un inquilino con ese email.");
+                return;
+            }
+            String telefono = IOUtils.askSoloDigitosMinLength("Registrar inquilino", "Telefono", 8);
+            if (inquilinos.stream().anyMatch(i -> i.getTelefono().equals(telefono))) {
+                IOUtils.warn("Duplicado", "Ya existe un inquilino con ese telefono.");
+                return;
+            }
             String usuario = IOUtils.askNonEmpty("Registrar inquilino", "Nombre de usuario");
+            if (inquilinos.stream().anyMatch(i -> i.getNombreUsuario().equalsIgnoreCase(usuario))) {
+                IOUtils.warn("Duplicado", "El nombre de usuario ya esta en uso.");
+                return;
+            }
             String pass = IOUtils.askNonEmpty("Registrar inquilino", "Contrasena (min 6 chars)");
 
             Inquilino nuevo = new Inquilino(id, nombre, email, telefono, usuario, pass);

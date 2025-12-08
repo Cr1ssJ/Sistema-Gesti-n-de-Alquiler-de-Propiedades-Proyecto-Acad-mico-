@@ -164,12 +164,26 @@ public class Propiedad {
             double precioBase = IOUtils.askPositiveDouble("Propiedad", "Precio mensual base");
 
             // Datos basicos del propietario
-            String propietarioId = IOUtils.askNonEmpty("Propietario", "ID del propietario");
+            String propietarioId = IOUtils.askCedula("Propietario", "ID del propietario");
             String propietarioNombre = IOUtils.askSoloLetras("Propietario", "Nombre completo");
             String propietarioEmail = IOUtils.askEmail("Propietario", "Email");
-            String propietarioTelefono = IOUtils.askSoloDigitos("Propietario", "Telefono");
+            String propietarioTelefono = IOUtils.askSoloDigitosMinLength("Propietario", "Telefono", 8);
             String propietarioUsuario = IOUtils.askNonEmpty("Propietario", "Nombre de usuario");
             String propietarioPass = IOUtils.askNonEmpty("Propietario", "Contrasena (min 6 chars)");
+
+            boolean idDupe = propiedades.stream().anyMatch(p ->
+                    p.getPropietario().getId().equalsIgnoreCase(propietarioId));
+            boolean emailDupe = propiedades.stream().anyMatch(p ->
+                    p.getPropietario().getEmail().equalsIgnoreCase(propietarioEmail));
+            boolean telDupe = propiedades.stream().anyMatch(p ->
+                    p.getPropietario().getTelefono().equals(propietarioTelefono));
+            boolean userDupe = propiedades.stream().anyMatch(p ->
+                    p.getPropietario().getNombreUsuario().equalsIgnoreCase(propietarioUsuario));
+            if (idDupe || emailDupe || telDupe || userDupe) {
+                IOUtils.warn("Duplicado",
+                        "Ya existe un propietario con alguno de los datos (cedula/email/telefono/usuario).");
+                return;
+            }
             Propietario propietario = new Propietario(
                     propietarioId, propietarioNombre, propietarioEmail,
                     propietarioTelefono, propietarioUsuario, propietarioPass);

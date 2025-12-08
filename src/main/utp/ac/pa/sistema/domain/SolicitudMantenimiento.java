@@ -105,53 +105,63 @@ public class SolicitudMantenimiento {
         this.estado = EstadoSolicitud.CANCELADA;
     }
 
+    private static Tecnico buscarTecnicoPorId(List<SolicitudMantenimiento> tickets, String id) {
+        for (SolicitudMantenimiento t : tickets) {
+            if (t.getTecnicoAsignado() != null
+                    && t.getTecnicoAsignado().getId().equalsIgnoreCase(id)) {
+                return t.getTecnicoAsignado();
+            }
+        }
+        return null;
+    }
+
+    private static boolean existeTecnicoDuplicado(List<SolicitudMantenimiento> tickets,
+                                                  String id, String email,
+                                                  String telefono, String usuario) {
+        for (SolicitudMantenimiento t : tickets) {
+            Tecnico tec = t.getTecnicoAsignado();
+            if (tec == null) {
+                continue;
+            }
+            if (tec.getId().equalsIgnoreCase(id)
+                    || tec.getEmail().equalsIgnoreCase(email)
+                    || tec.getTelefono().equals(telefono)
+                    || tec.getNombreUsuario().equalsIgnoreCase(usuario)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Flujo interactivo para registrar una solicitud de mantenimiento.
      * No se dispone de la lista de contratos en este metodo (ver Main),
      * por lo que se crea un contrato ligero con los datos proporcionados.
      */
-    public static void registrarSolicitud(List<Propiedad> propiedades,
-                                          List<Inquilino> inquilinos,
+    public static void registrarSolicitud(List<ContratoAlquiler> contratos,
                                           List<SolicitudMantenimiento> tickets) {
-        if (propiedades.isEmpty() || inquilinos.isEmpty()) {
+        if (contratos.isEmpty()) {
             IOUtils.warn("Datos faltantes",
-                    "Debe haber al menos una propiedad y un inquilino registrados.");
+                    "Debe haber al menos un contrato registrado.");
             return;
         }
         try {
-            String propId = IOUtils.askNonEmpty("Solicitud", "ID de la propiedad");
-            Propiedad prop = propiedades.stream()
-                    .filter(p -> p.getIdPropiedad().equalsIgnoreCase(propId))
+            String contratoId = IOUtils.askNonEmpty("Solicitud", "ID del contrato");
+            ContratoAlquiler contrato = contratos.stream()
+                    .filter(c -> c.getIdContrato().equalsIgnoreCase(contratoId))
                     .findFirst()
                     .orElse(null);
-            if (prop == null) {
-                IOUtils.warn("No encontrada", "Propiedad no encontrada.");
-                return;
-            }
-
-            String inqId = IOUtils.askNonEmpty("Solicitud", "ID del inquilino");
-            Inquilino inq = inquilinos.stream()
-                    .filter(i -> i.getId().equalsIgnoreCase(inqId))
-                    .findFirst()
-                    .orElse(null);
-            if (inq == null) {
-                IOUtils.warn("No encontrado", "Inquilino no encontrado.");
+            if (contrato == null) {
+                IOUtils.warn("No encontrado", "Contrato no encontrado. Verifique el ID.");
                 return;
             }
 
             String descripcion = IOUtils.askNonEmpty("Solicitud",
                     "Describa el problema de mantenimiento");
 
-            // Contrato ligero para asociar la solicitud
-            LocalDate inicio = LocalDate.now();
-            LocalDate fin = inicio.plusMonths(12);
-            double monto = prop.calcularPrecioTotalMensual();
-            ContratoAlquiler contratoLigero = new ContratoAlquiler(
-                    "CT-" + System.currentTimeMillis(), prop, inq, inicio, fin, monto, 5);
-
             String idTicket = "TCK-" + (tickets.size() + 1);
             SolicitudMantenimiento ticket = new SolicitudMantenimiento(
-                    idTicket, contratoLigero, descripcion);
+                    idTicket, contrato, descripcion);
             tickets.add(ticket);
             IOUtils.info("OK", "Solicitud registrada con ID " + idTicket);
         } catch (ValidacionException e) {
@@ -182,15 +192,25 @@ public class SolicitudMantenimiento {
         try {
             switch (opcion) {
                 case "1" -> {
-                    String techId = IOUtils.askNonEmpty("Tecnico", "ID");
-                    String techNombre = IOUtils.askSoloLetras("Tecnico", "Nombre completo");
-                    String techEmail = IOUtils.askEmail("Tecnico", "Email");
-                    String techTel = IOUtils.askSoloDigitos("Tecnico", "Telefono");
-                    String techUser = IOUtils.askNonEmpty("Tecnico", "Usuario");
-                    String techPass = IOUtils.askNonEmpty("Tecnico", "Contrasena (min 6 chars)");
-                    String techEsp = IOUtils.askNonEmpty("Tecnico", "Especialidad");
-                    Tecnico tecnico = new Tecnico(
-                            techId, techNombre, techEmail, techTel, techUser, techPass, techEsp);
+                    String techId = IOUtils.askCedula("Tecnico", "ID");
+                    Tecnico tecnicoExistente = buscarTecnicoPorId(tickets, techId);
+                    Tecnico tecnico;
+                    if (tecnicoExistente != null) {
+                        tecnico = tecnicoExistente;
+                    } else {
+                        String techNombre = IOUtils.askSoloLetras("Tecnico", "Nombre completo");
+                        String techEmail = IOUtils.askEmail("Tecnico", "Email");
+                        String techTel = IOUtils.askSoloDigitosMinLength("Tecnico", "Telefono", 8);
+                        String techUser = IOUtils.askNonEmpty("Tecnico", "Usuario");
+                        if (existeTecnicoDuplicado(tickets, techId, techEmail, techTel, techUser)) {
+                            IOUtils.warn("Duplicado", "Ya existe un tecnico con esos datos.");
+                            return;
+                        }
+                        String techPass = IOUtils.askNonEmpty("Tecnico", "Contrasena (min 6 chars)");
+                        String techEsp = IOUtils.askNonEmpty("Tecnico", "Especialidad");
+                        tecnico = new Tecnico(
+                                techId, techNombre, techEmail, techTel, techUser, techPass, techEsp);
+                    }
                     ticket.asignarTecnico(tecnico);
                     IOUtils.info("OK", "Tecnico asignado.");
                 }

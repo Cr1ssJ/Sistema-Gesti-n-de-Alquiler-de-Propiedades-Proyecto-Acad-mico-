@@ -2,7 +2,7 @@ package utp.ac.pa.sistema.domain;
 
 /**
  * Clase base para todos los usuarios del sistema:
- * Propietario, Inquilino, Técnico, Administrador.
+ * Propietario, Inquilino, Tecnico, Administrador.
  */
 public abstract class Usuario {
 
@@ -29,7 +29,7 @@ public abstract class Usuario {
         setRol(rol);
     }
 
-    // Validación genérica de texto
+    // Validacion generica de texto
     private void validarTextoObligatorio(String valor, String campo) throws ValidacionException {
         if (valor == null || valor.trim().isEmpty()) {
             throw new ValidacionException("El campo " + campo + " es obligatorio.");
@@ -42,7 +42,11 @@ public abstract class Usuario {
 
     public void setId(String id) throws ValidacionException {
         validarTextoObligatorio(id, "id de usuario");
-        this.id = id.trim();
+        String limpio = id.trim();
+        if (!limpio.matches("(10|[1-9])-\\d{1,4}-\\d{1,4}")) {
+            throw new ValidacionException("Formato de cedula invalido. Ejemplo: 1-2023-2324 (primer bloque 1-10; demas 1-4 digitos).");
+        }
+        this.id = limpio;
     }
 
     public String getNombreCompleto() {
@@ -51,7 +55,11 @@ public abstract class Usuario {
 
     public void setNombreCompleto(String nombreCompleto) throws ValidacionException {
         validarTextoObligatorio(nombreCompleto, "nombre completo");
-        this.nombreCompleto = nombreCompleto.trim();
+        String limpio = nombreCompleto.trim();
+        if (!limpio.matches("[A-Za-z ]+")) {
+            throw new ValidacionException("El nombre no puede estar vacio ni contener caracteres invalidos.");
+        }
+        this.nombreCompleto = limpio;
     }
 
     public String getEmail() {
@@ -60,10 +68,11 @@ public abstract class Usuario {
 
     public void setEmail(String email) throws ValidacionException {
         validarTextoObligatorio(email, "email");
-        if (!email.contains("@")) {
-            throw new ValidacionException("El email no es válido.");
+        String limpio = email.trim();
+        if (!limpio.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new ValidacionException("Correo electronico invalido. Verifique el formato.");
         }
-        this.email = email.trim();
+        this.email = limpio;
     }
 
     public String getTelefono() {
@@ -71,8 +80,12 @@ public abstract class Usuario {
     }
 
     public void setTelefono(String telefono) throws ValidacionException {
-        validarTextoObligatorio(telefono, "teléfono");
-        this.telefono = telefono.trim();
+        validarTextoObligatorio(telefono, "telefono");
+        String limpio = telefono.trim();
+        if (!limpio.matches("\\d{8,}")) {
+            throw new ValidacionException("El telefono debe contener solo numeros y tener al menos 8 digitos.");
+        }
+        this.telefono = limpio;
     }
 
     public String getNombreUsuario() {
@@ -89,9 +102,9 @@ public abstract class Usuario {
     }
 
     public void setContrasena(String contrasena) throws ValidacionException {
-        validarTextoObligatorio(contrasena, "contraseña");
+        validarTextoObligatorio(contrasena, "contrasena");
         if (contrasena.length() < 6) {
-            throw new ValidacionException("La contraseña debe tener al menos 6 caracteres.");
+            throw new ValidacionException("La contrasena debe tener al menos 6 caracteres.");
         }
         this.contrasena = contrasena;
     }
