@@ -46,12 +46,18 @@ public class Main {
 
             String opcion = IOUtils.ask("Menu principal", menu);
 
+            if (opcion == null || opcion.isBlank()) {
+                // Cancelar o vacio: salir del programa
+                run = false;
+                continue;
+            }
+
             switch (opcion) {
                 case "1" -> Propiedad.registrarPropiedad(propiedades);
                 case "2" -> Inquilino.registrarInquilino(inquilinos);
                 case "3" -> ContratoAlquiler.crearContrato(propiedades, inquilinos, contratos);
                 case "4" -> Pago.registrarPago(contratos, pagos);
-                case "5" -> SolicitudMantenimiento.registrarSolicitud(propiedades, inquilinos, tickets);
+                case "5" -> SolicitudMantenimiento.registrarSolicitud(contratos, tickets);
 
                 case "6" -> GestorReportes.mostrarResumen(
                         propiedades, inquilinos, contratos, pagos, tickets);
