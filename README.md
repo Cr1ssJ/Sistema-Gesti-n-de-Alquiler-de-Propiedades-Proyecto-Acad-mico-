@@ -1,4 +1,5 @@
 # Sistema de Gestión de Alquiler de Propiedades
+### Proyecto Final – Programación I (Java)
 
 **Integrantes del grupo:**  
 - Cristian Jimenez  
@@ -6,11 +7,50 @@
 - Lia Reyes  
 - Jassier Hernandez  
 
+Este repositorio contiene el desarrollo completo de un **Sistema de Gestión de Alquileres**, construido siguiendo principios sólidos de **Programación Orientada a Objetos (POO)**, diseñado para simular la administración integral de propiedades, contratos, pagos, mantenimientos y actores involucrados (inquilinos, propietarios, técnicos y administradores).
+
+El proyecto fue desarrollado a lo largo de los **Avances #1, #2 y #3**, incorporando modelado UML, diseño del dominio, modularización del código, manejo de entradas/salidas, validaciones y presentación del sistema.  
+Actualmente, el sistema se encuentra **finalizado** y estructurado para ser mantenido y ampliado fácilmente.
+
 ---
 
-##  Descripción del proyecto
-El **Sistema de Gestión de Alquiler de Propiedades** permite administrar propiedades, contratos de alquiler, inquilinos, pagos, mantenimiento y reportes.  
-Este avance corresponde al **Avance #1 y Avance #2**, que incluye la definición de clases, escenarios clave, y la estructura del repositorio en GitHub.
+## Objetivos del Sistema
+- Gestionar propiedades, propietarios e inquilinos.
+- Registrar contratos de alquiler con sus características y fechas.
+- Procesar pagos y gestionar planes de pago.
+- Registrar solicitudes de mantenimiento y asignarlas a técnicos.
+- Generar reportes para la administración.
+- Simular un flujo completo de un sistema de alquiler a nivel académico.
+
+---
+
+## Principales Funcionalidades
+- **Gestión de usuarios del sistema**
+  - Administrador, Propietario, Inquilino, Técnico.
+- **Manejo de contratos de alquiler**
+  - Creación, modificación y seguimiento del contrato.
+- **Procesamiento de pagos**
+  - Planes de pago, historial, montos y fechas.
+- **Registro de propiedades**
+  - Dirección, dueño, estado y características.
+- **Notificaciones**
+  - Simulación de envío y registro de notificaciones internas.
+- **Módulo de mantenimiento**
+  - Solicitud, asignación de técnico y seguimiento.
+- **Generación de reportes**
+  - Reportes administrativos y de actividad del sistema.
+
+---
+
+## Arquitectura del Proyecto
+
+El sistema sigue un diseño modular basado en POO:
+
+- **domain/** → Contiene todas las entidades del sistema.  
+- **utils/** → Herramientas para manejo de entrada/salida (IOUtils).  
+- **Main.java** → Punto de entrada del programa.  
+- **docs/** → Documentación académica del proyecto.  
+- **uml/** → Diagramas UML utilizados en el diseño (Avance #1 y #2).
 
 ---
 
@@ -30,35 +70,43 @@ alquiler-propiedades/
 │   │       │           └── domain/
 │   │       │               ├── Administrador.java
 │   │       │               ├── ContratoAlquiler.java
+│   │       │               ├── DataStore.java
 │   │       │               ├── Direccion.java
+│   │       │               ├── EstadoContrato.java
+│   │       │               ├── EstadoSolicitud.java
 │   │       │               ├── GestorReportes.java
+│   │       │               ├── GestorUsuarios.java
 │   │       │               ├── Inquilino.java
 │   │       │               ├── Notificacion.java
 │   │       │               ├── Pago.java
-│   │       │               ├── PlanPago.java
 │   │       │               ├── Propiedad.java
 │   │       │               ├── Propietario.java
 │   │       │               ├── ServicioIncluido.java
 │   │       │               ├── SolicitudMantenimiento.java
 │   │       │               ├── Tecnico.java
+│   │       │               ├── TipoPropiedad.java
 │   │       │               └── Usuario.java
+│   │       │               ├── ValidacionException.java
 ├── docs/
 │   ├── Avance1_Documentacion_Sistema_Alquiler.docx
+│   ├── Avance1_Documentacion_Sistema_Alquiler.pdf
+│   ├── Documento de Diseño de Interfaz y Validaciones - Avance 3.pdf
+│   ├── Tablas Avance #2.docx
+│   ├── diagrama de flujo.png
 │   ├── uml/
 │   │   ├── Avance #1 Proyecto Programacion.png
+│   │   ├── Diagrama Final UML.png
+│   │   ├── Diagrama UML Actualizado.png
 │   │   
 └── README.md
 ```
 
 ---
-
-##  Contenido de `docs/`
-| Archivo | Descripción |
-|----------|-------------|
-| `Avance1_Documentacion_Sistema_Alquiler.docx` | Contiene las tablas de escenarios, clases, atributos y métodos. |
-| `Avance #1 Proyecto Programacion.png` | Diagrama UML del sistema. |
-| `Tablas Avance #2.docx` | Contiene las tablas de clases y escenarios actualizados en base al nuevo diagrama UML. |
-| `Diagrama UML Actualizado.png` | Diagrama UML del sistema. |
+## 🛠️ Tecnologías Utilizadas
+- **Java 17**
+- Programación Orientada a Objetos (POO)
+- Diseño UML (Clases & Relaciones)
+- Validaciones de entrada
 
 ---
 
@@ -71,16 +119,32 @@ alquiler-propiedades/
 6. Gestión de propiedades y usuarios.
 
 ---
+ ## Decisiones de Diseño Importantes
+- El modelo se centró en **entidades**, manteniendo la lógica de registro dentro de cada clase según las indicaciones académicas.
+- No se añadió un controlador central para respetar la estructura requerida.
+- El sistema permite futuras extensiones como:
+  - Conexión a base de datos.
+  - Interfaz gráfica (JavaFX / Swing).
+  - Autenticación real de usuarios.
 
-##  Avance #1 — Entregables
--  Documento de Word con tablas de escenarios y clases.  
--  Diagrama UML con clases, atributos y asociaciones.  
--  Estructura completa de proyecto en GitHub.
+---
+   ## Enfoque Académico  
+Este proyecto forma parte del desarrollo progresivo del curso de Programación I, demostrando:
+
+- Aplicación de conceptos de POO (herencia, composición, encapsulación).
+- Modelado mediante diagramas UML.
+- Construcción iterativa del sistema.
+- Implementación de casos de uso reales en software académico.
+- Buenas prácticas de estructuración y documentación.
+
+## Autor del Repositorio
+**Cristian Jiménez** (Cr1ssJ) 
+Estudiante de Ciberseguridad – Universidad Tecnológica de Panamá  
+Enfoque en ciberseguridad defensiva, análisis de eventos y seguridad en la nube (AWS)
 
 ---
 
-##  Avance #2 — Entregables
--  Documento de Word Actualizado con tablas de escenarios y clases.  
--  Diagrama UML Actualizado aplicando feedback brindado por el profesor.  
-   
+## Licencia
+Este proyecto es de uso académico. Puede ser utilizado como referencia o base educativa.
+
 > Proyecto desarrollado para la asignatura **Programación I**, Universidad Tecnológica de Panamá (UTP).
