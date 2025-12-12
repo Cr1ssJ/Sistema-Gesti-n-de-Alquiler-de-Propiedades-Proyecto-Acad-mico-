@@ -54,7 +54,7 @@ public class Propiedad {
 
     public void setDireccion(Direccion direccion) throws ValidacionException {
         if (direccion == null) {
-            throw new ValidacionException("La dirección es obligatoria.");
+            throw new ValidacionException("La direcciÃ³n es obligatoria.");
         }
         this.direccion = direccion;
     }
@@ -171,29 +171,54 @@ public class Propiedad {
             String propietarioUsuario = IOUtils.askNonEmpty("Propietario", "Nombre de usuario");
             String propietarioPass = IOUtils.askNonEmpty("Propietario", "Contrasena (min 6 chars)");
 
-            boolean idDupe = propiedades.stream().anyMatch(p ->
-                    p.getPropietario().getId().equalsIgnoreCase(propietarioId));
-            boolean emailDupe = propiedades.stream().anyMatch(p ->
-                    p.getPropietario().getEmail().equalsIgnoreCase(propietarioEmail));
-            boolean telDupe = propiedades.stream().anyMatch(p ->
-                    p.getPropietario().getTelefono().equals(propietarioTelefono));
-            boolean userDupe = propiedades.stream().anyMatch(p ->
-                    p.getPropietario().getNombreUsuario().equalsIgnoreCase(propietarioUsuario));
-            if (idDupe || emailDupe || telDupe || userDupe) {
-                IOUtils.warn("Duplicado",
-                        "Ya existe un propietario con alguno de los datos (cedula/email/telefono/usuario).");
-                return;
-            }
-            Propietario propietario = new Propietario(
-                    propietarioId, propietarioNombre, propietarioEmail,
-                    propietarioTelefono, propietarioUsuario, propietarioPass);
+            // Permitir que un propietario tenga varias propiedades:
+            // si la cedula ya existe, reutilizamos ese propietario solo si los datos coinciden.
+            Propietario propietarioExistente = propiedades.stream()
+                    .map(Propiedad::getPropietario)
+                    .filter(p -> p.getId().equalsIgnoreCase(propietarioId))
+                    .findFirst()
+                    .orElse(null);
 
+            Propietario propietario;
+            if (propietarioExistente != null) {
+                boolean nombreOk = propietarioExistente.getNombreCompleto()
+                        .equalsIgnoreCase(propietarioNombre);
+                boolean emailOk = propietarioExistente.getEmail()
+                        .equalsIgnoreCase(propietarioEmail);
+                boolean telOk = propietarioExistente.getTelefono()
+                        .equals(propietarioTelefono);
+                boolean userOk = propietarioExistente.getNombreUsuario()
+                        .equalsIgnoreCase(propietarioUsuario);
+
+                if (!nombreOk || !emailOk || !telOk || !userOk) {
+                    IOUtils.warn("Duplicado",
+                            "La cedula ya pertenece a " + propietarioExistente.getNombreCompleto()
+                                    + ". Debe usar los mismos datos del propietario existente.");
+                    return;
+                }
+                propietario = propietarioExistente;
+            } else {
+                boolean emailDupe = propiedades.stream().anyMatch(p ->
+                        p.getPropietario().getEmail().equalsIgnoreCase(propietarioEmail));
+                boolean telDupe = propiedades.stream().anyMatch(p ->
+                        p.getPropietario().getTelefono().equals(propietarioTelefono));
+                boolean userDupe = propiedades.stream().anyMatch(p ->
+                        p.getPropietario().getNombreUsuario().equalsIgnoreCase(propietarioUsuario));
+                if (emailDupe || telDupe || userDupe) {
+                    IOUtils.warn("Duplicado",
+                            "Ya existe un propietario con alguno de los datos (email/telefono/usuario).");
+                    return;
+                }
+                propietario = new Propietario(
+                        propietarioId, propietarioNombre, propietarioEmail,
+                        propietarioTelefono, propietarioUsuario, propietarioPass);
+            }
             Propiedad nueva = new Propiedad(
                     id, direccion, tipo, metros, precioBase, propietario);
 
             // Agregar servicios incluidos (opcional)
             while (true) {
-                String agregar = IOUtils.askNonEmpty("Propiedad", "¿Desea agregar un servicio incluido? (s/n)");
+                String agregar = IOUtils.askNonEmpty("Propiedad", "Â¿Desea agregar un servicio incluido? (s/n)");
                 if (agregar.equalsIgnoreCase("s")) {
                     try {
                         String nombreServ = IOUtils.askSoloLetras("Servicio", "Nombre del servicio");
@@ -244,3 +269,4 @@ public class Propiedad {
         }
     }
 }
+
